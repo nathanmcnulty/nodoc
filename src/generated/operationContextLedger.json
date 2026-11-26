@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "summary": {
     "specificationCount": 22,
-    "operationCount": 2027,
-    "contextOperationCount": 284,
+    "operationCount": 2037,
+    "contextOperationCount": 294,
     "missingContextOperationCount": 1743
   },
   "specifications": [
@@ -72965,8 +72965,8 @@
           ]
         }
       },
-      "operationCount": 320,
-      "contextOperationCount": 92,
+      "operationCount": 330,
+      "contextOperationCount": 102,
       "missingContextOperationCount": 228,
       "operations": [
         {
@@ -78896,6 +78896,141 @@
           }
         },
         {
+          "operationId": "Search.GetPortalSuggestions",
+          "summary": "Get portal search suggestions",
+          "method": "POST",
+          "path": "/fd/substrateSearchService/api/v1/suggestions",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared M365 portal shell",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native POST transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "Response schemas use complete, hash-verified private sidecars, not truncated previews. No required fields, enums, formats or examples are inferred.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-c33b3433922a6f7b10ed"
+                ],
+                "verifiedAt": "2026-11-26T04:49:12.995Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
           "operationId": "Search.GetConfigurations",
           "summary": "Get search configurations",
           "method": "GET",
@@ -84247,6 +84382,141 @@
           }
         },
         {
+          "operationId": "Edge.AnalyzeReleaseNotes",
+          "summary": "Analyze Edge release notes",
+          "method": "POST",
+          "path": "/fd/edgemanagementpft/api/analysis/releaseNotes",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Microsoft Edge management",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native POST transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "Response schemas use complete, hash-verified private sidecars, not truncated previews. No required fields, enums, formats or examples are inferred.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-142b4d7ea340ab631c09"
+                ],
+                "verifiedAt": "2026-11-26T04:53:23.822Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
           "operationId": "Edge.GetIEModeSiteLists",
           "summary": "Get Edge IE mode site lists",
           "method": "GET",
@@ -87012,6 +87282,816 @@
           }
         },
         {
+          "operationId": "Support.GetConciergeConfig",
+          "summary": "Get support widget configuration",
+          "method": "GET",
+          "path": "/api/concierge/GetConciergeConfig",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-6a0c0644ed61941fc693"
+                ],
+                "verifiedAt": "2026-11-26T04:49:13.102Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Support.GetConciergeConfigAll",
+          "summary": "Get extended support configuration",
+          "method": "GET",
+          "path": "/api/concierge/GetConciergeConfigAll",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-8e562ffcf799c41717a4"
+                ],
+                "verifiedAt": "2026-11-26T04:49:14.235Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Support.SearchTickets",
+          "summary": "Search support tickets",
+          "method": "GET",
+          "path": "/api/concierge/ticket/search",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-8ea79fb8657e62956bf8"
+                ],
+                "verifiedAt": "2026-11-26T04:49:16.350Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "partial"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "partial",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Support.GetTenantInfoV2",
+          "summary": "Get support tenant context",
+          "method": "GET",
+          "path": "/api/tenantauthorization/GetTenantInfoV2",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-e6ff3c4191610e585544"
+                ],
+                "verifiedAt": "2026-11-26T04:49:12.077Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Support.GetTenantInfoModel",
+          "summary": "Get the support tenant information model",
+          "method": "GET",
+          "path": "/api/tenantauthorization/TenantInfoModel",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-40e1d7ab3a8b4b597732"
+                ],
+                "verifiedAt": "2026-11-26T04:49:14.234Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Support.GetUserPreferences",
+          "summary": "Get shared support user preferences",
+          "method": "GET",
+          "path": "/api/tenantauthorization/UserPreferences",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared support experience loaded by the M365 portal",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "The response was captured incompletely; only transport, query names and observed status are published. Response schema remains unknown.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-de8e367023625fd4d6d5"
+                ],
+                "verifiedAt": "2026-11-26T04:49:15.483Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
           "operationId": "Support.GetDefaultMinimizeSupportWidget",
           "summary": "Get the default support-widget minimized state",
           "method": "GET",
@@ -89236,6 +90316,141 @@
           }
         },
         {
+          "operationId": "Features.GetAgent365Config",
+          "summary": "Get Agent 365 feature configuration",
+          "method": "GET",
+          "path": "/admin/api/features/agent365/config",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Shared M365 portal shell",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "Response schemas use complete, hash-verified private sidecars, not truncated previews. No required fields, enums, formats or examples are inferred.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-3331f03af22288391e73"
+                ],
+                "verifiedAt": "2026-11-26T04:49:09.890Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "unknown",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "unknown",
+              "responseStatuses": []
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
           "operationId": "Features.GetInitialLoad",
           "summary": "Get initial load feature flags",
           "method": "GET",
@@ -89490,6 +90705,146 @@
               "responseStatuses": [
                 "401",
                 "403",
+                "404"
+              ]
+            },
+            "pagination": {
+              "status": "unknown",
+              "value": null
+            },
+            "leastPrivilege": {
+              "status": "unknown",
+              "reason": "not-inferred-from-observed-portal-traffic-or-operation-names"
+            }
+          }
+        },
+        {
+          "operationId": "Billing.GetMarketplaceProduct",
+          "summary": "Get a billing account marketplace product",
+          "method": "GET",
+          "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Marketplace/products/{productId}",
+          "effectiveServerUrls": [
+            "https://admin.cloud.microsoft"
+          ],
+          "category": null,
+          "operationContext": {
+            "surface": "Billing > Your products",
+            "availability": {
+              "level": "user-context",
+              "notes": [
+                "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+              ]
+            },
+            "provenance": [
+              {
+                "source": "m365-known-refresh-20261126T3",
+                "confidence": "high",
+                "notes": [
+                  "Exact native GET transport on admin.cloud.microsoft. Stable observation references and per-response completeness are recorded in the linked evidence record.",
+                  "Response schemas use complete, hash-verified private sidecars, not truncated previews. No required fields, enums, formats or examples are inferred.",
+                  "Native background traffic does not establish a causal workflow, absence of side effects, replay safety, licensing or minimum roles."
+                ]
+              }
+            ],
+            "behavior": {
+              "methodKnowledge": "observed"
+            },
+            "automationEvidence": {
+              "existence": {
+                "state": "verified",
+                "observationIds": [
+                  "request-951e7ab746a19af0448f",
+                  "request-021c0a8174d2592cc842",
+                  "request-0d1231611f2ad5d06e86",
+                  "request-493ae3b5b41868be7f43"
+                ],
+                "verifiedAt": "2026-11-26T04:55:34.045Z"
+              },
+              "method": {
+                "state": "unknown"
+              },
+              "input": {
+                "state": "unknown"
+              },
+              "populatedResponse": {
+                "state": "unknown"
+              },
+              "conditionalErrors": {
+                "state": "unknown"
+              },
+              "auth": {
+                "state": "unknown"
+              },
+              "pagination": {
+                "state": "unknown"
+              },
+              "retry": {
+                "state": "unknown"
+              },
+              "async": {
+                "state": "unknown"
+              },
+              "freshness": {
+                "state": "unknown"
+              }
+            }
+          },
+          "contextCompleteness": {
+            "overall": "partial",
+            "workflow": "unknown",
+            "authHeaders": "unknown",
+            "audience": "unknown",
+            "prerequisites": "partial",
+            "requestExamples": "unknown",
+            "errors": "partial",
+            "pagination": "unknown"
+          },
+          "evidenceStrength": [
+            {
+              "source": "m365-known-refresh-20261126T3",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "x-nodoc-live-capture",
+              "strength": "partial",
+              "reason": "checked-in-metadata-without-verified-immutable-artifact-binding"
+            }
+          ],
+          "usage": {
+            "status": "partial",
+            "workflow": {
+              "status": "unknown",
+              "values": []
+            },
+            "authHeaders": {
+              "status": "unknown",
+              "headerProfile": null,
+              "authProfile": null
+            },
+            "audience": {
+              "status": "unknown",
+              "values": []
+            },
+            "prerequisites": {
+              "status": "partial",
+              "permissions": [],
+              "availability": {
+                "level": "user-context",
+                "notes": [
+                  "One lab session. Required inputs, standalone invocation, effective grants and minimum roles remain untested."
+                ]
+              }
+            },
+            "requestExamples": {
+              "status": "unknown"
+            },
+            "errors": {
+              "status": "partial",
+              "responseStatuses": [
                 "404"
               ]
             },

@@ -23,7 +23,10 @@ Sources checked November 25, 2026:
 
 `.github/workflows/monthly-review.yml` has a manual trigger and a monthly cron
 at **18:17 UTC on the first**. This is UTC, not a daylight-saving-adjusted local
-time. Scheduled execution is **off until `NODOC_MONTHLY_ENABLED=true` is set**.
+time. Scheduled execution requires `NODOC_MONTHLY_ENABLED=true`. This repository
+enabled it on November 26, 2026 with `NODOC_MONTHLY_REVIEWER=none`; a manual
+non-publishing run completed successfully. Scheduled runs publish deterministic
+public-source review branches, not live observations or AI-generated changes.
 There is no app automation, Windows scheduled task or self-hosted runner.
 GitHub schedules can be delayed or dropped and can be disabled after inactivity
 in public repositories. The manual trigger is the recovery path, not a promise
@@ -140,8 +143,9 @@ before treating a model report as ready to publish.
 To enable recurring runs after reviewing these settings, set
 `NODOC_MONTHLY_ENABLED=true` and `NODOC_MONTHLY_REVIEWER=none` or `copilot`.
 The schedule then pushes monthly review branches. Remove/set the enabled
-variable to `false` to stop it. Activation and private cloud provisioning
-are owner decisions; this implementation does neither automatically.
+variable to `false` to stop it. The current repository schedule is enabled in
+`none` mode. Switching to `copilot` requires both dedicated credentials and
+private accounting storage first. Private cloud provisioning remains separate.
 
 ## Private capture design
 

@@ -517,6 +517,8 @@ paths:
     $ref: reports.yml#/paths/~1admin~1api~1admindashboard~1preferences
 
   # Search
+  /fd/substrateSearchService/api/v1/suggestions:
+    $ref: search.yml#/paths/~1fd~1substrateSearchService~1api~1v1~1suggestions
   /admin/api/searchadminapi/configurations:
     $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1configurations
   /admin/api/searchadminapi/searchintelligencehome/cards:
@@ -663,6 +665,8 @@ paths:
     $ref: purview.yml#/paths/~1fd~1purview~1api~1boot~1getNexusBootInfo
 
   # Edge
+  /fd/edgemanagementpft/api/analysis/releaseNotes:
+    $ref: edge.yml#/paths/~1fd~1edgemanagementpft~1api~1analysis~1releaseNotes
   /fd/edgeenterprisesitemanagement/api/v2/emiesitelists:
     $ref: edge.yml#/paths/~1fd~1edgeenterprisesitemanagement~1api~1v2~1emiesitelists
   /fd/edgeenterpriseextensionsmanagement/api/policies:
@@ -745,6 +749,18 @@ paths:
     $ref: viva.yml#/paths/~1admin~1api~1viva~1glint~1lookupClient
 
   # Shared support and Concierge
+  /api/concierge/GetConciergeConfig:
+    $ref: support.yml#/paths/~1api~1concierge~1GetConciergeConfig
+  /api/concierge/GetConciergeConfigAll:
+    $ref: support.yml#/paths/~1api~1concierge~1GetConciergeConfigAll
+  /api/concierge/ticket/search:
+    $ref: support.yml#/paths/~1api~1concierge~1ticket~1search
+  /api/tenantauthorization/GetTenantInfoV2:
+    $ref: support.yml#/paths/~1api~1tenantauthorization~1GetTenantInfoV2
+  /api/tenantauthorization/TenantInfoModel:
+    $ref: support.yml#/paths/~1api~1tenantauthorization~1TenantInfoModel
+  /api/tenantauthorization/UserPreferences:
+    $ref: support.yml#/paths/~1api~1tenantauthorization~1UserPreferences
   /api/concierge/DefaultMinimizeSupportWidget:
     $ref: support.yml#/paths/~1api~1concierge~1DefaultMinimizeSupportWidget
   /api/concierge/FeatureSettings:
@@ -807,6 +823,8 @@ paths:
     $ref: navigation.yml#/paths/~1admin~1api~1navigation~1async
 
   # Features
+  /admin/api/features/agent365/config:
+    $ref: features.yml#/paths/~1admin~1api~1features~1agent365~1config
   /admin/api/features/initialload:
     $ref: features.yml#/paths/~1admin~1api~1features~1initialload
   /admin/api/features/admincontentcdnimagepath:
@@ -817,6 +835,8 @@ paths:
     $ref: features.yml#/paths/~1admin~1api~1features~1all
 
   # Billing
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Marketplace/products/{productId}:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1providers~1Microsoft.Marketplace~1products~1{productId}
   /admin/api/licenses/requests/summary:
     $ref: billing.yml#/paths/~1admin~1api~1licenses~1requests~1summary
   /admin/api/neptunelicensing/configurationplans:

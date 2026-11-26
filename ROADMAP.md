@@ -198,8 +198,14 @@ the capture/transfer/publication software can be exercised offline.
    known-operation refresh qualified on November 26 under a renewed owner
    approval: the target operation was observed with a complete 200 response,
    health was `healthy-observed`, and the passive capture queued 86 candidates
-   (71 documented, 15 undocumented) privately. Promoting the undocumented
-   candidates and scoring that cycle remain open. The run also fixed two
+   (71 documented, 15 undocumented) privately. The publication resolves those
+   15 entries into 10 relevant operations: four product URLs become one
+   parameterized billing route, and two support-log routes remain excluded
+   telemetry. Four operations have complete response-sidecar schemas, including
+   the observed billing 404; both POSTs have observed request structures. Six
+   support operations publish transport/query evidence with explicit response
+   schema gaps because their retained bodies were incomplete. This does not
+   renew portfolio coverage or measure Luna cost per accepted change. The run also fixed two
    runtime defects: frozen (sleeping) reused tabs and same-URL first actions
    being attributed to the seed navigation.
 5. Extend the offline pilot only with evidence that can answer an open
@@ -216,15 +222,17 @@ the capture/transfer/publication software can be exercised offline.
 - The owner can sign in when a specific capture needs an authenticated session.
   Sign-in alone does not repair missing or expired capture approvals.
 - The monthly runner now uses GitHub Actions rather than the retiring VM.
-  Scheduled activation and optional AI credentials/private storage remain
-  owner-controlled. No automatic merging is enabled.
+  The first-of-month 18:17 UTC schedule was enabled on November 26 with
+  `NODOC_MONTHLY_REVIEWER=none`; it publishes deterministic public-source review
+  branches, not live capture or automatic merges. Optional AI credentials and
+  private storage remain owner-controlled.
 - Still needed from the owner:
   - a tenant choice and a sign-in/MFA session for each live capture;
   - renewed recipe approvals where they have expired (M365 Admin renewed
     through December 3, 2026);
   - an Azure subscription, resource group, region, budget and network
     decision before anything in `infra/azure-capture` is deployed;
-  - the `NODOC_COPILOT_TOKEN` secret and private accounting storage for
-    optional Luna runs, and setting `NODOC_MONTHLY_ENABLED` to start the schedule;
+  - the `NODOC_COPILOT_TOKEN` secret and private accounting storage before
+    switching the already-enabled schedule to optional Luna review;
   - confirming the receiver-side SHA-256 of the November 25 pilot evidence
     archive sent to paseo.
