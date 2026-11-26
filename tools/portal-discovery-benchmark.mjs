@@ -19,6 +19,17 @@ export async function loadBenchmarkCorpus(filePath = corpusPath) {
 export const benchmarkModes = ["fixture", "measured"];
 const plainObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
+function regressionsFor(results, mode) {
+  return results.filter((result) => result.status !== "pass").map((result) => ({
+    scenarioId: result.scenarioId,
+    scenarioDigest: result.scenarioDigest,
+    mode,
+    status: result.status,
+    evidenceSource: result.evidenceSource,
+    failedChecks: [...result.reasonCodes].sort(),
+  })).sort((a, b) => a.scenarioId.localeCompare(b.scenarioId));
+}
+
 // Fixture mode falls back to each scenario's syntheticResult so the corpus can
 // self-test. Measured mode scores only supplied worker outputs; a missing
 // scenario fails instead of borrowing the fixture answer.
@@ -35,7 +46,9 @@ function checkedInputs(corpus, inputs, mode) {
 }
 
 export function runOfflineBenchmark(corpus, { inputs = {}, mode = "fixture" } = {}) {
-  if (!corpus || corpus.schemaVersion !== benchmarkSchemaVersion) throw new Error("Unsupported benchmark corpus schema.");
+  if (!corpus || corpus.schemaVersion !== benchmarkSchemaVersion || !Array.isArray(corpus.scenarios) || corpus.scenarios.length === 0
+    || corpus.scenarios.some((scenario) => typeof scenario?.scenarioId !== "string" || !scenario.scenarioId.trim())
+    || new Set(corpus.scenarios.map((scenario) => scenario.scenarioId)).size !== corpus.scenarios.length) throw new Error("Unsupported or corrupt benchmark corpus schema.");
   const supplied = checkedInputs(corpus, inputs, mode);
   const measured = mode === "measured";
   const results = corpus.scenarios.map((scenario) => {
@@ -48,7 +61,7 @@ export function runOfflineBenchmark(corpus, { inputs = {}, mode = "fixture" } = 
     return { ...base, actual, evidenceSource, status: mismatches.length ? "fail" : "pass", reasonCodes: mismatches };
   }).sort((a, b) => a.scenarioId.localeCompare(b.scenarioId));
   const count = (predicate) => results.filter(predicate).length;
-  const core = { schemaVersion: benchmarkSchemaVersion, mode, corpusId: corpus.corpusId, corpusDigest: benchmarkDigest(corpus), results, measurements: {
+  const core = { schemaVersion: benchmarkSchemaVersion, mode, corpusId: corpus.corpusId, corpusDigest: benchmarkDigest(corpus), results, regressions: regressionsFor(results, mode), measurements: {
     scenarioCount: results.length, passCount: count((r) => r.status === "pass"), failCount: count((r) => r.status !== "pass"),
     driftCount: count((r) => r.status === "fail"), missingInputCount: count((r) => r.status === "missing-input"),
     suppliedInputCount: count((r) => r.evidenceSource === "caller-supplied-result"), fixtureFallbackCount: count((r) => r.evidenceSource === "fixture-self-check"),
@@ -63,6 +76,19 @@ export function runOfflineBenchmark(corpus, { inputs = {}, mode = "fixture" } = 
 
 export function validateBenchmarkScorecard(scorecard) {
   if (!scorecard || scorecard.schemaVersion !== benchmarkSchemaVersion || scorecard.benchmarkDigest !== benchmarkDigest(Object.fromEntries(Object.entries(scorecard).filter(([key]) => !["benchmarkId", "benchmarkDigest"].includes(key))))) throw new Error("Benchmark scorecard digest or schema mismatch.");
+  if (!benchmarkModes.includes(scorecard.mode) || !Array.isArray(scorecard.results) || scorecard.results.length === 0 || !Array.isArray(scorecard.regressions)
+    || scorecard.results.some((result) => {
+      if (!plainObject(result) || typeof result.scenarioId !== "string" || !result.scenarioId.trim() || !/^[a-f0-9]{64}$/u.test(result.scenarioDigest) || !plainObject(result.expected) || !Array.isArray(result.reasonCodes)) return true;
+      if (result.evidenceSource === "missing") return scorecard.mode !== "measured" || result.actual !== null || result.status !== "missing-input" || JSON.stringify(result.reasonCodes) !== JSON.stringify(["missing-worker-output"]);
+      if (!["caller-supplied-result", "fixture-self-check"].includes(result.evidenceSource) || (scorecard.mode === "measured" && result.evidenceSource !== "caller-supplied-result") || !plainObject(result.actual)) return true;
+      const mismatches = Object.entries(result.expected).filter(([key, expected]) => JSON.stringify(result.actual[key]) !== JSON.stringify(expected)).map(([key]) => `assertion:${key}`);
+      return result.status !== (mismatches.length ? "fail" : "pass") || JSON.stringify(result.reasonCodes) !== JSON.stringify(mismatches);
+    })
+    || new Set(scorecard.results.map((result) => result.scenarioId)).size !== scorecard.results.length
+    || JSON.stringify(scorecard.regressions) !== JSON.stringify(regressionsFor(scorecard.results, scorecard.mode))
+    || scorecard.measurements?.failCount !== scorecard.regressions.length
+    || scorecard.measurements?.synthetic !== (scorecard.mode === "fixture")
+    || scorecard.benchmarkId !== `benchmark-${scorecard.benchmarkDigest.slice(0, 24)}`) throw new Error("Benchmark scorecard results or regressions mismatch.");
   return scorecard;
 }
 
