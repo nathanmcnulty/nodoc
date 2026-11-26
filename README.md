@@ -100,8 +100,8 @@ The repository also keeps checked-in collections under [`postman/collections/`](
 
 ## Roadmap
 
-The plan for monthly, evidence-based portal documentation, including the state
-of open drafts, is in [ROADMAP.md](ROADMAP.md). Other project items:
+The plan for monthly, evidence-based portal documentation, including stage status\r
+and the remaining owner decisions, is in [ROADMAP.md](ROADMAP.md). Other project items:
 
 - [ ] Support [OpenAPI Links](https://swagger.io/docs/specification/links/)
 - [ ] Migrate to OpenAPI 3.1 ([blocker](https://community.postman.com/t/unable-to-validate-this-definition-when-choosing-3-1-0/56871/2))
