@@ -45,10 +45,10 @@ type Filters = {
 
 const pageSize = 50;
 const gapOptions = [
-  { value: "", label: "Any documentation state" },
+  { value: "", label: "Any" },
   { value: "schema", label: "Schema gap" },
   { value: "example", label: "Example gap" },
-  { value: "any", label: "Schema or example gap" },
+  { value: "any", label: "Schema or example" },
   { value: "none", label: "No authored gaps" },
 ];
 const count = (value: number) => value.toLocaleString("en-US");
@@ -257,7 +257,7 @@ export default function Operations(): ReactElement {
               </select>
             </label>
             <label>
-              <span>Documentation</span>
+              <span>Authored gaps</span>
               <select value={filters.gap} onChange={(event) => update({ gap: event.target.value })}>
                 {gapOptions.map((option) => (
                   <option key={option.value} value={option.value}>
