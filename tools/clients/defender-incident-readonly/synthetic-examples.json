@@ -1,0 +1,36 @@
+{
+  "label": "Synthetic example only; contains no tenant data.",
+  "responses": {
+    "Incidents.Get": {
+      "status": 200,
+      "contentType": "application/json",
+      "body": {
+        "incidentId": "SYNTHETIC-INCIDENT-001",
+        "incidentName": "Synthetic suspicious sign-in investigation",
+        "severity": "Medium",
+        "status": "Active",
+        "alertCount": 1,
+        "createdTime": "2026-01-15T12:00:00Z",
+        "lastUpdatedTime": "2026-01-15T12:30:00Z"
+      }
+    },
+    "Incidents.GetAssociatedAlerts": {
+      "status": 200,
+      "contentType": "application/json",
+      "body": [
+        {
+          "alertId": "SYNTHETIC-ALERT-001",
+          "incidentId": "SYNTHETIC-INCIDENT-001",
+          "title": "Synthetic unfamiliar sign-in",
+          "severity": "Medium",
+          "status": "New",
+          "category": "InitialAccess",
+          "serviceSource": "SyntheticSource",
+          "detectionSource": "SyntheticDetection",
+          "alertCreationTime": "2026-01-15T12:00:00Z",
+          "lastUpdatedTime": "2026-01-15T12:10:00Z"
+        }
+      ]
+    }
+  }
+}

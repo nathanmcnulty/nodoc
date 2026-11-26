@@ -87,6 +87,11 @@ Run `npm run generate:automation-evidence -- --output <artifact-path>` for a det
 
 Run `npm run test:evidence` for the scoped offline contract, provenance, report-only planning and export regressions. CI sets `NODOC_POSTMAN_PIPELINE=1` so the suite also runs the pinned Postman converter against synthetic fixtures; in PowerShell, set `$env:NODOC_POSTMAN_PIPELINE = '1'` before running the command locally. These tests do not contact a portal or establish live acceptance.
 
+For a contract-driven offline client example, see
+[`tools/clients/defender-incident-readonly/`](./tools/clients/defender-incident-readonly/README.md).
+It exercises a synthetic, GET-only incident workflow; live acceptance against
+a signed-in tenant remains pending and owner-gated.
+
 The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files, and the repo also keeps a machine-readable portal coverage ledger under `src/generated/`.
 
 - Regenerate it with `npm run generate:site-data`.
