@@ -68,6 +68,29 @@ The public output is `report.json`; a model attempt can also write
 use owner-only directory/file permissions; on Windows use an owner-private
 directory with appropriate inherited ACLs.
 
+### Price private evidence before uploading it
+
+On the machine that already holds the private evidence, run:
+
+```powershell
+npm run --silent measure:capture-storage -- --directory "C:\private\retained-run" --usd-per-gib-month 0.0184
+```
+
+This dry run uses the production archive writer with a counting sink: no Azure
+login, network upload, second copy, or file deletion. It reports source bytes,
+encoded payload bytes after deduplication, and manifest bytes with a synthetic
+run binding. Repeat `--directory` for multiple distinct snapshots to measure
+their combined footprint, including objects shared across runs. Only aggregate
+counts/sizes are printed, not paths, digests or evidence values.
+
+The optional rate is a **capacity-only** estimate for retaining that set for a
+full month. The example uses West US 2 Hot LRS first-tier USD pricing checked
+November 26, 2026; use the [current price for your account and region](https://azure.microsoft.com/pricing/details/storage/blobs/).
+`archivePutCalls` counts writer requests, **not billable transactions**: actual
+upload blocks, verification reads, leases, retries, versions/soft-deleted
+blobs, run receipts, logging and compute are excluded. This does not predict
+the size of an unmeasured portal or certify that a capture can be restored.
+
 ### Manual CI execution
 
 In **Actions > Monthly documentation review > Run workflow**, leave
