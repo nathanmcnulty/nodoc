@@ -46,7 +46,7 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. [#241](https://github.com/nathanmcnulty/nodoc/pull/241) turns every failed or missing benchmark scenario into a blocked frontier item. Cost per accepted change needs a live capture cycle. |
 | 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Offline acceptance delivered in [#242](https://github.com/nathanmcnulty/nodoc/pull/242): a GET-only Defender incident client built from the published contract and synthetic examples, with unobserved behavior reported as `unknown`. Live acceptance against a signed-in tenant is pending. |
 | 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Delivered: the coverage page, then [#243](https://github.com/nathanmcnulty/nodoc/pull/243) added the operation index, deep links, bundled OpenAPI downloads, `operations.json` and `llms.txt`. Each download is listed with its spec version and SHA-256; earlier versions are in git history rather than archived on the site. |
-| 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. An undeployed Azure capture host template is ready ([#240](https://github.com/nathanmcnulty/nodoc/pull/240)). |
+| 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Recovery software is implemented: a containerized adapter to the existing capture driver, verified private Blob archives/restore, phase-boundary checkpoints and a separately approved coverage publisher. Synthetic recurrence/failure tests are not live acceptance. Two authorized live cycles, browser hosting and M6 remain blocked on owner prerequisites. |
 
 ## Delivered
 
@@ -81,9 +81,10 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
   navbar groups the APIs by portal.
 - **Azure capture host template.** [`infra/azure-capture`](infra/azure-capture/README.md)
   defines a manual Container Apps Job, private blob storage, Key Vault and a
-  scoped identity. It is not deployed. The capture image, private uploader and
-  publisher are not implemented, and storage is authenticated but not network
-  isolated.
+  scoped identity. The buildable runtime, private uploader/restore path and
+  reviewed coverage publisher are now implemented. It is not deployed; the
+  authenticated Chromium session is not provisioned and storage is
+  authenticated but not network isolated.
 
 ## Monthly cycle
 
@@ -168,12 +169,15 @@ was updated on November 25, 2026.
 
 ## Next increments
 
-Each of these needs a signed-in session or an owner decision; see below.
+The remaining live acceptance steps need signed-in sessions or owner decisions;
+the capture/transfer/publication software can be exercised offline.
 
 1. Qualify a cloud-hosted private capture exercise. Deploy `infra/azure-capture`
-   only after approval, then build the approved capture image, private
-   uploader with checkpointing, and publisher. Manual recorder acceptance (M6)
-   stays separate from the implemented offline review.
+   only after approval, publish the reviewed capture image and qualify its
+   authenticated browser connection and private storage permissions. Exercise
+   the implemented uploader, interrupted-run handling, restore and publisher
+   with real approved evidence. Manual recorder acceptance (M6) stays separate
+   from the synthetic software tests.
 2. Run the Defender incident client against a signed-in tenant and record the
    observed auth, status and media types, errors and pagination as typed
    evidence.

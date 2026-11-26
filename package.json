@@ -42,6 +42,8 @@
     "generate:operation-index": "node tools/generate-operation-index.mjs",
     "project:coverage": "node tools/public-coverage.mjs project",
     "review:monthly": "node tools/monthly-review.mjs",
+    "capture:private": "node tools/private-capture-job.mjs",
+    "publish:capture-coverage": "node tools/publish-capture-coverage.mjs",
     "validate:portal-discovery": "node tools/validate-portal-discovery-metadata.mjs",
     "validate:graph-research": "node tools/validate-graph-research.mjs",
     "evidence:response": "node tools/response-evidence.mjs inspect",
@@ -62,6 +64,8 @@
     "preview": "npm run build && wrangler dev"
   },
   "dependencies": {
+    "@azure/identity": "4.14.1",
+    "@azure/storage-blob": "12.34.0",
     "@docusaurus/core": "^3.10.2",
     "@docusaurus/preset-classic": "^3.10.2",
     "@iconify/react": "^6.0.2",

@@ -117,7 +117,7 @@ export function assertPublicCoverageSnapshot(snapshot, options) {
 
 // Accepts the private inventory.json or refresh-report.json written by
 // runPortfolioRefresh and copies only reviewed aggregate counts.
-export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_STATUS.md", assessedAt = null, windowDays = null, publicTitles } = {}) {
+export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_STATUS.md", assessedAt = null, windowDays = null, publicTitles, assessedSpecIds = null } = {}) {
   if (!plainObject(input) || input.schemaVersion !== 1) throw new Error("Refresh output must be a schemaVersion 1 inventory or report.");
   const isReport = plainObject(input.portfolio);
   const portfolio = isReport ? input.portfolio : input;
@@ -132,6 +132,7 @@ export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_ST
   if (!(publicTitles instanceof Map)) throw new Error("Projecting a private assessment requires titles from the public spec catalog.");
   const field = (source, key, context) => {
     if (!Object.hasOwn(source, key)) throw new Error(`${context} lacks ${key}; missing measures are never treated as zero.`);
+    if (!isCount(source[key])) throw new Error(`${context}.${key} must be a nonnegative integer.`);
     return source[key];
   };
   const project = (source, context) => ({
@@ -148,9 +149,21 @@ export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_ST
     totals: { specs: field(portfolio.summary, "specCount", "summary"), operations: field(portfolio.summary, "operationCount", "summary"), ...project(portfolio.summary, "summary") },
     specs: portfolio.specs.map((spec, index) => {
       if (!publicTitles.has(spec.specId)) throw new Error(`specs[${index}]: unknown specId; not in the public catalog.`);
-      return { specId: spec.specId, title: publicTitles.get(spec.specId), operations: spec.operationCount, ...project(spec.freshness ?? {}, `specs[${index}].freshness`) };
+      return { specId: spec.specId, title: publicTitles.get(spec.specId), operations: field(spec, "operationCount", `specs[${index}]`), ...project(spec.freshness ?? {}, `specs[${index}].freshness`) };
     })
       .sort((a, b) => String(a.title).localeCompare(String(b.title))),
+  };
+  assertPublicCoverageSnapshot(snapshot);
+  if (assessedSpecIds === null) return snapshot;
+  if (!(assessedSpecIds instanceof Set) || assessedSpecIds.size === 0) throw new Error("An assessment scope must contain captured specification IDs.");
+  const rowsById = new Map(snapshot.specs.map(spec => [spec.specId, spec]));
+  for (const specId of assessedSpecIds) {
+    if (!rowsById.has(specId)) throw new Error("Capture specId is missing from the refresh portfolio.");
+  }
+  snapshot.specs = snapshot.specs.filter(spec => assessedSpecIds.has(spec.specId));
+  snapshot.totals = {
+    specs: snapshot.specs.length,
+    ...Object.fromEntries(["operations", ...measures].map(key => [key, snapshot.specs.reduce((sum, spec) => sum + spec[key], 0)])),
   };
   return assertPublicCoverageSnapshot(snapshot);
 }

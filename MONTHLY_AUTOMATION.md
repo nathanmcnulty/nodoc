@@ -114,6 +114,13 @@ are owner decisions; this implementation does neither automatically.
 
 ## Private capture design
 
+The [private capture runtime](infra/azure-capture/README.md) now supplies a
+container build, bounded adapter to the existing discovery driver, verified
+Azure Blob archives/restoration, interrupted-run handling and an independently
+approved coverage publisher. It is not deployed and does not create or
+authenticate a browser session. Its synthetic recovery exercises do not
+replace the signed-in acceptance described below.
+
 Keep portal sessions and raw evidence out of this public repository and its
 Actions logs. An Azure job would use an immutable image containing the existing
 Node tooling and Chromium, private Blob storage for inputs/checkpoints/outputs,
@@ -153,12 +160,15 @@ rotation, and access/retention/publication procedures. The infrastructure README
 provides the exact deployment command and teardown guidance. Managed identity
 does not authenticate a portal user; do not weaken MFA or conditional access.
 
-The future runner must write private evidence, receipts and accounting to the
-private blob container without logging them. After offline validation and
-independent review, only allowlisted sanitized report candidates or spec
-proposals may be pushed to a monthly branch for a PR, never directly to main.
-That private-capture uploader and publisher remain to be implemented and
-accepted; the existing public monthly workflow does not perform those steps.
+The implemented private-capture runtime uploads and restores private evidence
+and receipts without logging them, and its separately approved publisher
+proposes sanitized coverage reports on a review branch, never directly on main.
+Each dated coverage snapshot includes only specifications bound to complete
+captures in that refresh. Its totals are scoped to those specifications;
+other specifications are shown as unassessed in that snapshot, not as zero.
+Earlier snapshots remain dated historical records and are not copied forward.
+The existing public monthly workflow does not perform those capture steps.
+Deployment and real signed-in acceptance remain outstanding.
 
 ## Recovery and VM retirement
 
@@ -169,7 +179,9 @@ belongs in Azure, not disposable runner storage.
 
 The original offline pilot's reproducible public findings are preserved in
 [`reports/pilots/2026-11-25-m365-luna.md`](reports/pilots/2026-11-25-m365-luna.md).
-That is not a backup of its exact private runtime receipts. Those must be
-copied to an owner-approved private destination before deleting the old VM.
+That is not a backup of its exact private runtime receipts. A sender-side
+transfer to a private destination was performed, but the receiver's hash has
+not been confirmed. Keep the receipts private and verify the received copy
+before deleting the old VM.
 No portal sessions or VM credentials are required to run the implemented
 deterministic CI path.
