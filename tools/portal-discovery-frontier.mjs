@@ -7,6 +7,7 @@ export const frontierClasses = [
   "unvisited-state", "eligible-control", "failed-transition", "bundle-only-family",
   "missing-schema-shape", "unassigned-adjacent", "spec-evidence-gap",
   "safety-ownership-schema-conflict", "incomplete-health", "benchmark-regression",
+  "portfolio-gap", "unassessed-workflow",
 ];
 export const offlineFrontierSchemaVersion = 1;
 const gapClasses = new Set([
@@ -58,7 +59,7 @@ function itemFor(entry, metadata = {}) {
 export function calculateUnresolvedFrontier({ discovery = {}, portfolio = {}, benchmark = {}, metadata = {} } = {}) {
   assertSafe({ discovery, benchmark, metadata }, "frontier input");
   const entries = [];
-  const add = (entry) => entries.push(itemFor(entry, metadata));
+  const add = (entry, itemMetadata = metadata) => entries.push(itemFor(entry, itemMetadata));
   for (const state of discovery.unvisitedStates ?? []) add({ class: "unvisited-state", subject: state, expectedInformationClass: "state-transition", route: "cheap" });
   for (const control of discovery.eligibleButUnattempted ?? []) add({ class: "eligible-control", subject: control, expectedInformationClass: "control-outcome", route: "cheap" });
   for (const failure of discovery.failedTransitions ?? discovery.unknownTransitions ?? []) add({ class: "failed-transition", subject: failure, expectedInformationClass: "failure-cause", route: "luna", risk: "high" });
@@ -68,7 +69,21 @@ export function calculateUnresolvedFrontier({ discovery = {}, portfolio = {}, be
   for (const gap of discovery.specEvidenceGaps ?? []) add({ class: "spec-evidence-gap", subject: gap, expectedInformationClass: "existing-spec-corroboration", route: "cheap" });
   for (const conflict of discovery.safetyOwnershipSchemaConflicts ?? []) add({ class: "safety-ownership-schema-conflict", subject: conflict, expectedInformationClass: "conflict-resolution", route: "manual", risk: "critical" });
   if (discovery.health?.complete !== true || discovery.health?.available !== true || discovery.health?.accountingConsistent === false) add({ class: "incomplete-health", subject: "canonical-health", expectedInformationClass: "health-completeness", route: "orchestrator", risk: "high", blockers: ["canonical-health-incomplete"] });
-  for (const regression of benchmark.regressions ?? []) add({ class: "benchmark-regression", subject: regression, expectedInformationClass: "benchmark-drift", route: "orchestrator", risk: "high", blockers: ["benchmark-regression"] });
+  for (const regression of benchmark.regressions ?? []) {
+    if (!regression || typeof regression.scenarioId !== "string" || !["fixture", "measured"].includes(regression.mode)
+      || !["fail", "missing-input"].includes(regression.status) || !Array.isArray(regression.failedChecks)
+      || regression.failedChecks.some((check) => typeof check !== "string")) throw new Error("Invalid benchmark regression.");
+    add({
+      class: "benchmark-regression", subject: regression.scenarioId,
+      sourceRefs: benchmark.benchmarkId ? [benchmark.benchmarkId] : [],
+      expectedInformationClass: "benchmark-drift", route: "orchestrator", risk: "high", blockers: ["benchmark-regression"],
+      completionCriteria: ["repair failed checks and rerun the benchmark"],
+    }, { ...metadata, benchmarkRegression: regression });
+  }
+  for (const surface of portfolio.surfaces ?? []) {
+    if (surface.status !== "partial" || surface.specIds.length === 0) add({ class: "portfolio-gap", subject: surface.id, expectedInformationClass: "portal-mapping", route: "manual", blockers: ["scope-and-evidence-required"] });
+    for (const workflow of surface.workflows) add({ class: "unassessed-workflow", subject: `${surface.id}: ${workflow}`, expectedInformationClass: "native-workflow-and-ui-states", route: "manual", blockers: ["evidence-and-approval-required"] });
+  }
   const items = [...new Map(entries.map((entry) => [entry.itemId, entry])).values()].sort((a, b) => a.itemId.localeCompare(b.itemId));
   const core = { schemaVersion: frontierSchemaVersion, items, sourceDigest: frontierDigest({ discovery, portfolio, benchmark, metadata }) };
   return { ...core, frontierId: `frontier-set-${frontierDigest(core).slice(0, 24)}`, frontierDigest: frontierDigest(core), measurements: { itemCount: items.length, countsByClass: Object.fromEntries(frontierClasses.map((name) => [name, items.filter((item) => item.class === name).length])) } };

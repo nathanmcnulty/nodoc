@@ -22,6 +22,7 @@ import {
 } from "./portal-discovery-model-policy.mjs";
 import { loadReviewCache, writeReviewCache } from "./portal-discovery-review-cache.mjs";
 import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-paths.mjs";
+import { validateSurfaces } from "./portal-discovery-surfaces.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
@@ -150,6 +151,7 @@ export function validatePortfolioManifest(raw, inventory = null) {
     const ids = new Set(inventory.map((entry) => entry.specId));
     for (const portal of raw.portals) if (!ids.has(portal.specId)) throw new Error(`Portfolio references unknown spec ${portal.specId}.`);
     for (const entry of inventory) if (!seen.has(entry.specId)) throw new Error(`Specification ${entry.specId} is missing from the durable discovery queue.`);
+    if (raw.surfaces !== undefined) validateSurfaces(raw, inventory);
   }
   return clone(raw);
 }
@@ -166,6 +168,7 @@ export function materializePortfolioManifest(raw, inventory) {
   return {
     schemaVersion: portfolioManifestSchemaVersion,
     manifestId: requiredString(raw.manifestId, "manifestId"),
+    ...(raw.surfaces ? { surfaces: raw.surfaces.map(({ id, status, specIds, workflows }) => ({ id, status, specIds, workflows })) } : {}),
     portals: raw.portals.map((source) => {
       const spec = byId.get(source.specId);
       const metadata = crawlMetadataByTitle[spec.title];

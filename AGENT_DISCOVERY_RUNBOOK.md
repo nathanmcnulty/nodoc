@@ -64,6 +64,23 @@ fails. In controller stage inputs, set `benchmarkMode` to `measured` beside
 `benchmarkInputs`. Measured scores compare outputs with synthetic assertions;
 they still do not measure real tokens, cost, or portal coverage.
 
+Every scorecard includes a scenario-ID-sorted `regressions` list for all
+non-passing results, not just changes against a previous scorecard. Each entry
+records the scenario digest, mode, status, evidence source, and sorted failed
+checks; a missing measured answer is a failure with `missing-worker-output`.
+There is no checked-in baseline scorecard. The controller turns each entry into a
+blocked benchmark-regression frontier item and continues to block on any
+failure, including fixture self-check failures. Fixture results are not evidence
+that a worker model passed; require a passing measured run before trusting one.
+
+To turn a saved scorecard into an unresolved frontier without the controller,
+run `npm run generate:portal-frontier -- --benchmark-scorecard .\scorecard.json`.
+Save the benchmark command's stdout even when its exit code is nonzero. Optionally
+provide `--discovery .\discovery.json` for sanitized health and other discovery
+inputs. Without it, health remains unknown and produces an incomplete-health
+item. This mode is separate from the spec-specific offline capture frontier and
+does not authorize browser activity. Store only sanitized, allowlisted outputs.
+
 The authorization ceiling applies to every counted browser action, including
 implicit seed/bootstrap/navigation and replay expansion. Plan and surface the
 category totals before preflight and ledger-attempt consumption; reject
