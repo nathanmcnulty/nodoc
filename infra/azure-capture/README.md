@@ -26,7 +26,11 @@ and a container build do not qualify unattended portal capture.
   deployment if the tenant requires them; do not assume private networking.
 - The RBAC-mode vault has 90-day soft delete and purge protection. Provisioning
   a secret and granting an operator write access are deliberately separate.
-- Log Analytics retains job logs for 30 days. Container Apps uses the workspace
+- Log Analytics is **off by default** (`enableLogAnalytics=false`) to avoid
+  routine ingestion costs. Bounded driver diagnostics and evidence are still
+  archived privately in Blob; platform console/system logs are not retained
+  there. Opt in for operational troubleshooting when needed; the workspace
+  then retains job logs for 30 days. Container Apps uses the workspace
   ingestion shared key for this integration; it is passed directly to the
   environment, not output. Never log secrets, portal data or raw captures.
   Workspace access and retention need the same privacy review as evidence.
@@ -58,8 +62,53 @@ evidence, logs and running jobs incur costs even without a schedule.
 The deployment principal needs permission to create the resources and the two
 scoped role assignments. Job start can override an image or command: granting
 start access effectively grants access to the job identity and its data.
-Use a narrowly scoped operator role, and use GitHub OIDC if a separately
-approved future CI integration starts the job. No such integration exists here.
+Use a narrowly scoped operator role. The optional GitHub OIDC integration below
+starts the job without giving it any GitHub credential.
+
+## Low-cost manual CI orchestration
+
+`.github/workflows/private-capture.yml` is separate from monthly public review
+and publication. It has **no schedule**, no AI, no artifact upload and no
+GitHub write permission. It runs only from `main`, after the repository
+variable `NODOC_PRIVATE_CAPTURE_ENABLED` is explicitly set to `true`. Nothing
+in this increment enables it.
+
+After deployment and browser qualification, an owner must configure the
+`private-capture` GitHub environment with required reviewers, main-only
+deployment restrictions and variables `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`,
+`AZURE_SUBSCRIPTION_ID`, `CAPTURE_JOB_ID` (the full ARM job resource ID).
+Create a federated OIDC trust bound to that repository/environment and grant
+the CI identity only the job read/start and execution read operations at that
+job's scope. It needs no Blob, vault, registry or GitHub write permission.
+These grants are owner steps, not provisioned by this template. Starting a job
+is nevertheless sensitive: Azure's start API supports overrides, so its
+principal is effectively trusted to use the job identity. GitHub environment
+protection and restricted workflow changes are essential, not a substitute for
+Azure authorization.
+
+The dispatch input is only the approved plan SHA-256. The script checks the
+job's configured plan, immutable image reference, manual trigger, single
+replica, no retries and bounded timeout before issuing **one start without
+overrides**. It polls for at most 65 minutes; each Azure CLI call is bounded
+to 60 seconds, and the execution template must report the same plan and image
+before success is accepted. A concurrent Azure configuration edit can still
+race the start; a detected mismatch fails without claiming capture success
+or retrying. CLI output and configuration are never echoed. It does not stage
+plans, modify resources, read secrets or publish coverage. A successful Azure
+execution is not a fresh-coverage or tenant-authentication claim; inspect the
+private completed receipt and perform independent review.
+
+Cancellation, transport failure or timeout does **not** prove the Azure job
+stopped. Inspect its executions and private claim before another dispatch.
+No automatic restart or retry is attempted. CI concurrency complements rather
+than replaces the runtime's Blob lease.
+
+Jobs are manual and have no idle capture replicas. Consumption grants are
+subscription-wide, not a promise of zero cost; running replicas, Blob requests,
+storage/version/soft-delete overhead, optional logs and CI minutes can still
+be billed. No paid registry, private endpoint or dedicated workload profile is
+added. The existing 2-vCPU/4-GiB limit is retained until a real browser pilot
+justifies downsizing; lowering it without measuring could break capture.
 
 ## Validation and deployment
 
@@ -169,6 +218,48 @@ Production access uses HTTPS plus Entra authentication, not storage keys/SAS.
 Object requests have bounded retries and timeouts. Archives allow at most
 2,000 regular files, 64 MiB per file and 256 MiB total, including binary and
 empty files; symlinks, traversal and ambiguous Windows names are rejected.
+
+New archives use a `schemaVersion: 2` manifest (bounded to 2 MiB). Each file
+keeps its original byte count and SHA-256 and declares
+`storage: {version: 1, codec, bytes, sha256}` for the stored representation.
+Gzip level 6 is used only when smaller than the original; otherwise `identity`
+stores the exact original bytes. Objects live under
+`objects/v2/<codec>/<stored-sha256>`; identical representations are shared.
+Legacy `schemaVersion: 1` manifests and raw `objects/<sha256>` restore without
+rewriting or migrating any existing evidence. Restore checks stored length and
+hash, bounds decompression by the declared original length (also subject to the
+64-MiB/256-MiB limits), then checks original length and hash. Unknown encoding
+versions/codecs, truncation and integrity failures block restore.
+
+The CLI reports numeric archive accounting, including on restored/reused runs:
+`rawBytes` is the logical sum of original files; `storedBytes` is the logical
+sum after encoding; `uniqueStoredBytes` counts each referenced object once;
+`objectCount` counts distinct objects; `manifestBytes` is the exact manifest
+length. These are retained payload sizes, **not incremental uploads, Azure
+billing or cross-run totals**. Plans, run markers, locks, older shared objects,
+Blob metadata, versions and soft-deleted data are additional storage. Create-only
+upload plus readback also incurs requests even for already stored objects.
+
+Retain all lossless evidence needed for restoration and audit. There is no
+automatic deletion/lifecycle rule: old content-addressed objects can still be
+referenced by newer manifests. A future owner-approved cleanup must first mark
+all objects referenced by every retained manifest/receipt, account for backups
+and interrupted runs, then review any unreferenced candidates before deletion.
+Deleting objects simply by creation age would silently break retained archives.
+Compression is not anonymization.
+
+The evidence directory is for discovery outputs only. The driver receives
+explicit capture, bundle-cache, ledger and refresh paths and a restricted
+environment, not CI tokens or managed-identity configuration. Its `HOME`,
+`USERPROFILE`, `TEMP`, `TMP` and `TMPDIR` point to an isolated temporary sibling
+of the evidence root, removed when the driver/analysis stops. Before archival,
+the job rejects unexpected top-level content; only `capture`, `bundle-cache`,
+`refresh-cache`, `refresh`, `ledger.jsonl`, bounded driver logs/errors and the
+cloud receipt are accepted. Keep any browser
+profile, credential or authentication scratch files in a **separate sibling
+directory outside that evidence root**; this job still creates none. The
+archive walks the allowed output roots recursively, so never place authentication
+material there or treat it as an authentication working directory.
 
 Before invoking a driver, `runs/<runId>/started.json` claims the exact plan.
 After the driver stops, its output, bounded private diagnostics, refresh

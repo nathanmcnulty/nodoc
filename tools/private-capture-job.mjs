@@ -1,11 +1,11 @@
 import { execFile, execFileSync, spawn } from "node:child_process";
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { repoRoot, buildSpecInventory } from "./spec-quality-lib.mjs";
 import { assertNoRefreshLinks, privateRefreshDirectory } from "./portal-refresh-paths.mjs";
-import { archiveDirectory, digestPattern, jsonBytes, openPrivateBlobStore, restoreArchive, sha256 } from "./private-capture-store.mjs";
+import { archiveAccounting, archiveDirectory, digestPattern, jsonBytes, openPrivateBlobStore, readArchiveManifest, restoreArchive, sha256 } from "./private-capture-store.mjs";
 
 export function validateCapturePlan(plan) {
   const keys = ["schemaVersion", "runId", "sourceRevision", "specId", "recipe", "recipeSha256", "tenantId", "targetId", "timeoutSeconds"];
@@ -48,11 +48,23 @@ export function captureArguments(plan, directory) {
 
 // The cloud supervisor owns the entire subprocess tree. Child diagnostics never enter job logs.
 export async function executeCapture(plan, directory, signal, { driver = path.join(repoRoot, "tools", "run-portal-discovery.mjs"), refreshPortfolio = null } = {}) {
+  const runtime = await mkdtemp(path.join(path.dirname(directory), ".capture-runtime-"));
+  try {
+    return await executeWithRuntime(plan, directory, signal, { driver, refreshPortfolio, runtime });
+  } finally {
+    await rm(runtime, { recursive: true, force: true });
+  }
+}
+
+async function executeWithRuntime(plan, directory, signal, { driver, refreshPortfolio, runtime }) {
   const log = [];
   let size = 0, stopReason = null, escalation;
   const child = spawn(process.execPath, [driver, ...captureArguments(plan, directory)], {
     cwd: repoRoot, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"],
-    env: Object.fromEntries(["PATH", "SystemRoot", "HOME", "USERPROFILE", "TEMP", "TMP", "DISPLAY"].filter(key => process.env[key]).map(key => [key, process.env[key]])),
+    env: {
+      ...Object.fromEntries(["PATH", "SystemRoot", "DISPLAY"].filter(key => process.env[key]).map(key => [key, process.env[key]])),
+      HOME: runtime, USERPROFILE: runtime, TEMP: runtime, TMP: runtime, TMPDIR: runtime,
+    },
   });
   function kill(signalName) {
     if (!child.pid) return;
@@ -109,6 +121,15 @@ export async function executeCapture(plan, directory, signal, { driver = path.jo
   }
 }
 
+const evidenceRoots = new Set(["capture", "bundle-cache", "refresh-cache", "refresh", "ledger.jsonl",
+  "driver-private.log", "driver-error.private.json", "cloud-receipt.json"]);
+
+async function assertEvidenceWorkspace(directory) {
+  if ((await readdir(directory)).some(name => !evidenceRoots.has(name))) {
+    throw new Error("Unexpected evidence workspace content; keep browser profiles, credentials and authentication scratch outside it.");
+  }
+}
+
 const outcomeReasons = new Set(["independent-review-required", "capture-cancelled", "capture-timeout",
   "diagnostic-budget-exhausted", "capture-driver-blocked", "capture-analysis-blocked",
   "capture-process-failed", "authentication-required", "rate-limited"]);
@@ -133,8 +154,8 @@ export async function restorePrivateCapture({ plan, store, directory }) {
   const completed = await store.get(`runs/${plan.runId}/completed.json`, 1024 * 1024);
   if (!started?.equals(jsonBytes(binding)) || !completed) throw new Error("No completed archive exists for this exact plan.");
   const result = readCompleted(completed, planDigest);
-  await restoreArchive(store, result.archiveDigest, directory, binding);
-  return { ...result, reused: true };
+  const manifest = await restoreArchive(store, result.archiveDigest, directory, binding);
+  return { ...result, reused: true, storage: archiveAccounting(manifest) };
 }
 
 export async function runPrivateCapture({ plan, store, directory, execute = executeCapture, verify = verifyCaptureSource, renewalMs = 20000, recover = false }) {
@@ -163,8 +184,8 @@ export async function runPrivateCapture({ plan, store, directory, execute = exec
     if (completed) {
       if (!started) throw new Error("Completed run lacks its original claim.");
       const result = readCompleted(completed, planDigest);
-      await restoreArchive(store, result.archiveDigest, directory, binding);
-      return { ...result, reused: true };
+      const manifest = await restoreArchive(store, result.archiveDigest, directory, binding);
+      return { ...result, reused: true, storage: archiveAccounting(manifest) };
     }
     if (started && !recover) {
       // A lost runner may have sent requests. Do not infer it is safe to capture again.
@@ -187,13 +208,15 @@ export async function runPrivateCapture({ plan, store, directory, execute = exec
     }
     if (leaseError) throw leaseError;
     assertOutcome(outcome);
+    await assertEvidenceWorkspace(directory);
     const archiveDigest = await archiveDirectory(store, directory, binding);
     if (leaseError) throw leaseError;
     const result = { ...outcome, planDigest, archiveDigest, reused: false };
     // Completion is published only after every archived file has passed a remote readback.
     await lease.renew();
     await store.put(`${prefix}/completed.json`, jsonBytes(result));
-    return result;
+    const manifest = await readArchiveManifest(store, archiveDigest, binding);
+    return { ...result, storage: archiveAccounting(manifest) };
   } finally {
     stopped = true;
     clearTimeout(timer);
@@ -231,6 +254,7 @@ async function main() {
   }
   const options = { plan, store, directory: values.directory ?? "/work/capture" };
   const result = values.restore ? await restorePrivateCapture(options) : await runPrivateCapture({ ...options, recover: values.recover });
+  if (result.storage) console.log(`Private archive bytes: ${JSON.stringify(result.storage)}`);
   if (values.restore) {
     console.log("Private archive restored and verified. No capture or publication performed.");
     return;
