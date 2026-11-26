@@ -1,7 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { compileOfflineFrontier, validateOfflineFrontier } from "./portal-discovery-frontier.mjs";
+import { calculateUnresolvedFrontier, compileOfflineFrontier, validateFrontier, validateOfflineFrontier } from "./portal-discovery-frontier.mjs";
+import { validateBenchmarkScorecard } from "./portal-discovery-benchmark.mjs";
 import { captureRecipesByTitle } from "./portal-discovery-metadata.mjs";
 import { buildSpecInventory, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
 
@@ -13,12 +14,17 @@ function parseArgs(argv) {
       args.approved_only = true;
       continue;
     }
-    if (["--spec", "--recipe", "--coverage", "--prior-artifact", "--candidate-handoff", "--frontier-id", "--output"].includes(value)) {
+    if (["--spec", "--recipe", "--coverage", "--prior-artifact", "--candidate-handoff", "--frontier-id", "--output", "--benchmark-scorecard", "--discovery"].includes(value)) {
+      if (!argv[index + 1] || argv[index + 1].startsWith("--")) throw new Error(`${value} requires a value.`);
       args[value.slice(2).replaceAll("-", "_")] = argv[index + 1];
       index += 1;
+    } else {
+      throw new Error(`Unknown option ${value}.`);
     }
   }
-  if (!args.spec) throw new Error("Use --spec <spec-id> [--recipe <path>] [--prior-artifact <json>] [--candidate-handoff <json>] [--approved-only | --frontier-id <id>] [--output <json>].");
+  if (args.benchmark_scorecard) {
+    if (args.spec || args.recipe || args.coverage || args.prior_artifact || args.candidate_handoff || args.frontier_id || args.approved_only) throw new Error("--benchmark-scorecard cannot be combined with spec frontier options.");
+  } else if (!args.spec || args.discovery) throw new Error("Use --spec <spec-id> for an offline frontier, or --benchmark-scorecard <json> [--discovery <json>] for an unresolved frontier.");
   if (args.approved_only && args.frontier_id) throw new Error("Use only one frontier projection mode.");
   return args;
 }
@@ -28,6 +34,19 @@ async function readJsonIf(value, fallback) {
 }
 
 const args = parseArgs(process.argv.slice(2));
+if (args.benchmark_scorecard) {
+  const benchmark = validateBenchmarkScorecard(await readJsonIf(args.benchmark_scorecard, null));
+  const discovery = await readJsonIf(args.discovery, {});
+  const result = calculateUnresolvedFrontier({ benchmark, discovery });
+  validateFrontier(result);
+  const text = `${JSON.stringify(result, null, 2)}\n`;
+  if (args.output) {
+    const output = path.resolve(args.output);
+    await mkdir(path.dirname(output), { recursive: true });
+    await writeFile(output, text, "utf8");
+  }
+  process.stdout.write(text);
+} else {
 const inventory = await buildSpecInventory();
 const spec = inventory.find((entry) => entry.specId === args.spec);
 if (!spec) throw new Error(`Unknown specification ${args.spec}.`);
@@ -78,3 +97,4 @@ if (args.output) {
   await writeFile(output, text, "utf8");
 }
 process.stdout.write(text);
+}
