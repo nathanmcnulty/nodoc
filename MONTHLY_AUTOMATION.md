@@ -160,12 +160,11 @@ rotation, and access/retention/publication procedures. The infrastructure README
 provides the exact deployment command and teardown guidance. Managed identity
 does not authenticate a portal user; do not weaken MFA or conditional access.
 
-The future runner must write private evidence, receipts and accounting to the
-private blob container without logging them. After offline validation and
-independent review, only allowlisted sanitized report candidates or spec
-proposals may be pushed to a monthly branch for a PR, never directly to main.
-That private-capture uploader and publisher remain to be implemented and
-accepted; the existing public monthly workflow does not perform those steps.
+The implemented private-capture runtime uploads and restores private evidence
+and receipts without logging them, and its separately approved publisher
+proposes sanitized coverage reports on a review branch, never directly on main.
+The existing public monthly workflow does not perform those capture steps.
+Deployment and real signed-in acceptance remain outstanding.
 
 ## Recovery and VM retirement
 
@@ -176,7 +175,9 @@ belongs in Azure, not disposable runner storage.
 
 The original offline pilot's reproducible public findings are preserved in
 [`reports/pilots/2026-11-25-m365-luna.md`](reports/pilots/2026-11-25-m365-luna.md).
-That is not a backup of its exact private runtime receipts. Those must be
-copied to an owner-approved private destination before deleting the old VM.
+That is not a backup of its exact private runtime receipts. A sender-side
+transfer to a private destination was performed, but the receiver's hash has
+not been confirmed. Keep the receipts private and verify the received copy
+before deleting the old VM.
 No portal sessions or VM credentials are required to run the implemented
 deterministic CI path.
