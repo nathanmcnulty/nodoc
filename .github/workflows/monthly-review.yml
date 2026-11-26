@@ -60,22 +60,33 @@ jobs:
         run: |
           if [ -z "$USAGE_BLOB_SAS" ]; then echo "::error::Configure private Azure usage storage before running Copilot"; exit 1; fi
           node --input-type=module -e 'import {usageBlobUrl} from "./tools/store-monthly-usage.mjs"; import {randomUUID} from "node:crypto"; usageBlobUrl(process.env.USAGE_BLOB_SAS, randomUUID())'
-      - name: Prepare public report
-        env:
-          REVIEWER: ${{ steps.mode.outputs.reviewer }}
-          COPILOT_GITHUB_TOKEN: ${{ secrets.NODOC_COPILOT_TOKEN }}
-          MODEL: ${{ vars.NODOC_MONTHLY_MODEL || 'gpt-6-luna' }}
-        run: node tools/monthly-review.mjs --output "$RUNNER_TEMP/monthly" --reviewer "$REVIEWER" --model "$MODEL"
-      - name: Preserve private model accounting
+      - name: Reserve current-run output location
+        id: destination
+        run: |
+          directory=$(mktemp -d "$RUNNER_TEMP/monthly.XXXXXXXX")
+          echo "directory=$directory/review" >> "$GITHUB_OUTPUT"
+      - name: Prepare deterministic public report
+        if: steps.mode.outputs.reviewer == 'none'
+        run: node tools/monthly-review.mjs --output "${{ steps.destination.outputs.directory }}" --reviewer none
+      - name: Attempt model review with private accounting
+        id: model
         if: steps.mode.outputs.reviewer == 'copilot'
         env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.NODOC_COPILOT_TOKEN }}
+          MODEL: ${{ vars.NODOC_MONTHLY_MODEL || 'gpt-6-luna' }}
+        run: node tools/monthly-review.mjs --output "${{ steps.destination.outputs.directory }}" --reviewer copilot --model "$MODEL"
+      - name: Preserve private model accounting
+        id: accounting
+        if: ${{ !cancelled() && steps.mode.outputs.reviewer == 'copilot' && (steps.model.outcome == 'success' || steps.model.outcome == 'failure') }}
+        env:
           NODOC_USAGE_BLOB_SAS_URL: ${{ secrets.NODOC_USAGE_BLOB_SAS_URL }}
-        run: node tools/store-monthly-usage.mjs "$RUNNER_TEMP/monthly/model-usage.private.json"
+        run: node tools/store-monthly-usage.mjs "${{ steps.destination.outputs.directory }}/model-usage.private.json"
       - name: Retain only the publishable report
+        if: ${{ success() && (steps.mode.outputs.reviewer == 'none' || (steps.model.outcome == 'success' && steps.accounting.outcome == 'success')) }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: monthly-public-report
-          path: ${{ runner.temp }}/monthly/report.json
+          path: ${{ steps.destination.outputs.directory }}/report.json
           if-no-files-found: error
           retention-days: 30
       - name: Report completion
@@ -85,7 +96,7 @@ jobs:
 
   publish:
     needs: review
-    if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'schedule' && vars.NODOC_MONTHLY_ENABLED == 'true')
+    if: ${{ needs.review.result == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'schedule' && vars.NODOC_MONTHLY_ENABLED == 'true')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

@@ -56,9 +56,14 @@ npm ci
 npm run review:monthly -- --month 2026-11 --output C:\private\nodoc-monthly --reviewer none
 ```
 
-Use an output directory outside the checkout. The same command on Linux takes
-an absolute Linux output path. The public output is `report.json`; a selected
-model also writes `model-usage.private.json`, which must not be committed.
+Use a fresh, nonexistent output directory. Existing directories (including
+failed attempts) are refused without deleting or reusing their files. The same
+command on Linux takes an absolute Linux output path. Model output locations
+must resolve outside every Git checkout, including through symlinks.
+The public output is `report.json`; a model attempt can also write
+`model-usage.private.json`, which must not be committed. On Unix these outputs
+use owner-only directory/file permissions; on Windows use an owner-private
+directory with appropriate inherited ACLs.
 
 ### Manual CI execution
 
@@ -98,13 +103,38 @@ tools denied, no custom instructions and a three-minute timeout. It uses
 available model ID if needed. It never silently falls back to another model.
 The CLI's **30-credit soft cap** is a provider-unit ceiling, not dollars or a
 hard per-response limit. Invalid output, unavailable model/authentication,
-missing usage receipts or storage failure fail the job before publication.
+missing/malformed usage receipts or storage failure fail the job before
+publication. Model credentials exist only in the model step; storage credentials
+exist only in the storage preflight and upload steps, never the model environment.
 
 Usage receipts are uploaded under unique `monthly-usage/*.json` blob names with
-create-only semantics and no redirects. Raw CLI output and accounting are never
-uploaded as public Actions artifacts. Public reports keep USD cost unknown.
-Failed jobs may lose ephemeral receipts: diagnose the failure before retrying;
-do not interpret the lack of a receipt as zero cost.
+create-only semantics and no redirects. A fresh isolated CLI directory binds
+the receipt to the current attempt. Before parsing or accepting the answer, the
+runner preserves up to **128 KiB** of the emitted usage file privately, including
+after nonzero exits, timeouts, output overflow, invalid JSON or rejected
+selections. Missing, oversized, nonregular or malformed receipts fail closed;
+bounded malformed files remain private locally but are not uploaded as valid
+accounting. No failed review writes a public report.
+
+The pinned **Copilot CLI 1.0.116** offline `copilot help billing` documents final
+receipt fields `totalNanoAiu`, `totalPremiumRequestCost`, `modelMetrics` and
+`agentMetrics`. Receipt validation checks these minimum fields, not an invented
+provider schema or a conversion: nano AIU are provider units (10^9 per AI credit),
+premium requests are not money, and opaque metrics remain private. Provider
+totals can be partial/unavailable; retain them as reported, never infer zero
+from missing accounting. Public reports keep USD cost unknown.
+
+After a model attempt, Actions attempts a tightly scoped private upload even
+when the review step failed, unless the job is cancelled. Only successful review
+**and** successful accounting upload permit the public artifact and publisher.
+Raw CLI output, prompts, usage, credentials and underlying error details never
+enter public diagnostics or artifacts. Cancellation, hard runner loss, or CLI
+termination before a receipt is emitted can still lose accounting; upload
+failure also leaves only the ephemeral private local copy. Diagnose privately
+before retrying: absence of a receipt does not mean zero cost. Local execution
+does not upload automatically; preserve a valid receipt with
+`tools/store-monthly-usage.mjs` to the already-approved private destination
+before treating a model report as ready to publish.
 
 To enable recurring runs after reviewing these settings, set
 `NODOC_MONTHLY_ENABLED=true` and `NODOC_MONTHLY_REVIEWER=none` or `copilot`.

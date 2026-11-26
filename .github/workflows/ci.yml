@@ -143,6 +143,8 @@ jobs:
         run: npm ci
       - name: Test Windows Postman argument handling and check mode
         run: node --test tools/tests/generate-postman-collections.test.mjs
+      - name: Test Windows monthly accounting failure paths
+        run: node --test tools/tests/monthly-review.test.mjs
   validate:
     name: site
     needs: capture-image
