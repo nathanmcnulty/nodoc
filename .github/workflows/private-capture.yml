@@ -1,0 +1,43 @@
+name: Start approved private capture
+
+on:
+  workflow_dispatch:
+    inputs:
+      plan_digest:
+        description: "SHA-256 of the approved private plan already configured on the manual Azure Job"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: private-capture
+  cancel-in-progress: false
+
+jobs:
+  start:
+    if: github.ref == 'refs/heads/main' && vars.NODOC_PRIVATE_CAPTURE_ENABLED == 'true'
+    environment: private-capture
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+      - uses: azure/login@8216e11d8cd9b42fe925c852af8e76311ff067ac # v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Start once and wait for the configured job
+        env:
+          CAPTURE_JOB_ID: ${{ vars.CAPTURE_JOB_ID }}
+          CAPTURE_PLAN_DIGEST: ${{ inputs.plan_digest }}
+        run: node tools/start-private-capture.mjs

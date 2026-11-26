@@ -26,6 +26,9 @@ param captureImage string
 @maxLength(64)
 param capturePlanDigest string
 
+@description('Opt in to paid Log Analytics ingestion. Private evidence and bounded driver diagnostics remain in Blob either way.')
+param enableLogAnalytics bool = false
+
 var containerName = 'capture-private'
 var blobDataContributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
 var keyVaultSecretsUserRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
@@ -111,7 +114,7 @@ resource vaultAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (enableLogAnalytics) {
   name: '${namePrefix}-logs'
   location: location
   properties: {
@@ -126,12 +129,14 @@ resource environment 'Microsoft.App/managedEnvironments@2025-01-01' = {
   name: '${namePrefix}-env'
   location: location
   properties: {
-    appLogsConfiguration: {
+    appLogsConfiguration: enableLogAnalytics ? {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
-        customerId: logs.properties.customerId
-        sharedKey: logs.listKeys().primarySharedKey
+        customerId: logs!.properties.customerId
+        sharedKey: logs!.listKeys().primarySharedKey
       }
+    } : {
+      destination: 'none'
     }
   }
 }

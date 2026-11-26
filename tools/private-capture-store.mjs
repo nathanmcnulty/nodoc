@@ -3,12 +3,14 @@ import { createReadStream } from "node:fs";
 import { lstat, mkdir, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { addAbortSignal } from "node:stream";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { assertNoRefreshLinks, privateRefreshDirectory } from "./portal-refresh-paths.mjs";
 
 export const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 export const jsonBytes = value => Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
 export const digestPattern = /^[a-f0-9]{64}$/u;
-export const archiveLimits = { files: 2000, fileBytes: 64 * 1024 * 1024, totalBytes: 256 * 1024 * 1024 };
+export const archiveLimits = { files: 2000, fileBytes: 64 * 1024 * 1024, totalBytes: 256 * 1024 * 1024, manifestBytes: 2 * 1024 * 1024 };
+const manifestByteLengths = new WeakMap();
 
 class PrivateBlobTooLarge extends Error {}
 
@@ -143,31 +145,63 @@ export async function archiveDirectory(store, directory, binding) {
       totalBytes += bytes.length;
       if (totalBytes > archiveLimits.totalBytes) throw new Error("Private archive total byte limit exceeded.");
       const digest = sha256(bytes);
-      await store.put(`objects/${digest}`, bytes);
-      entries.push({ path: key, bytes: bytes.length, sha256: digest });
+      const compressed = gzipSync(bytes, { level: 6 });
+      const payload = compressed.length < bytes.length ? compressed : bytes;
+      const storage = { version: 1, codec: payload === bytes ? "identity" : "gzip", bytes: payload.length, sha256: sha256(payload) };
+      await store.put(objectKey({ storage }), payload);
+      entries.push({ path: key, bytes: bytes.length, sha256: digest, storage });
     }
   }
   await visit();
-  const manifest = { schemaVersion: 1, binding, entries };
+  const manifest = { schemaVersion: 2, binding, entries };
   const bytes = jsonBytes(manifest), digest = sha256(bytes);
+  if (bytes.length > archiveLimits.manifestBytes) throw new Error("Private archive manifest byte limit exceeded.");
   await store.put(`archives/${digest}.json`, bytes);
   return digest;
 }
 
-export async function restoreArchive(store, digest, directory, expectedBinding) {
+function objectKey(entry) {
+  return entry.storage ? `objects/v2/${entry.storage.codec}/${entry.storage.sha256}` : `objects/${entry.sha256}`;
+}
+
+export function archiveAccounting(manifest) {
+  const objects = new Map(manifest.entries.map(entry => [objectKey(entry), entry.storage?.bytes ?? entry.bytes]));
+  return {
+    rawBytes: manifest.entries.reduce((sum, entry) => sum + entry.bytes, 0),
+    storedBytes: manifest.entries.reduce((sum, entry) => sum + (entry.storage?.bytes ?? entry.bytes), 0),
+    uniqueStoredBytes: [...objects.values()].reduce((sum, bytes) => sum + bytes, 0),
+    objectCount: objects.size,
+    manifestBytes: manifestByteLengths.get(manifest) ?? jsonBytes(manifest).length,
+  };
+}
+
+export async function readArchiveManifest(store, digest, expectedBinding) {
   if (!digestPattern.test(digest)) throw new Error("Invalid private archive digest.");
-  const bytes = await store.get(`archives/${digest}.json`, 1024 * 1024);
+  const bytes = await store.get(`archives/${digest}.json`, archiveLimits.manifestBytes);
   if (!bytes || sha256(bytes) !== digest) throw new Error("Private archive manifest integrity failed.");
   const manifest = JSON.parse(bytes);
-  if (manifest.schemaVersion !== 1 || !Array.isArray(manifest.entries) || manifest.entries.length > archiveLimits.files
+  if (![1, 2].includes(manifest.schemaVersion) || !Array.isArray(manifest.entries) || manifest.entries.length > archiveLimits.files
     || JSON.stringify(manifest.binding) !== JSON.stringify(expectedBinding)) throw new Error("Private archive binding failed.");
   const seen = new Set();
   let total = 0;
   for (const entry of manifest.entries) {
+    if (!entry || typeof entry !== "object") throw new Error("Invalid private archive entry.");
     validKey(entry.path);
     const folded = entry.path.toLowerCase();
     if (seen.has(folded) || !digestPattern.test(entry.sha256) || !Number.isSafeInteger(entry.bytes)
       || entry.bytes < 0 || entry.bytes > archiveLimits.fileBytes) throw new Error("Invalid private archive entry.");
+    if (manifest.schemaVersion === 1) {
+      if (entry.storage !== undefined) throw new Error("Invalid legacy private archive entry.");
+    } else {
+      const storage = entry.storage;
+      if (!storage || storage.version !== 1 || !["identity", "gzip"].includes(storage.codec)
+        || !digestPattern.test(storage.sha256) || !Number.isSafeInteger(storage.bytes)
+        || storage.bytes < 0 || storage.bytes > entry.bytes
+        || (storage.codec === "gzip" && (storage.bytes === 0 || storage.bytes >= entry.bytes))
+        || (storage.codec === "identity" && (storage.bytes !== entry.bytes || storage.sha256 !== entry.sha256))) {
+        throw new Error("Invalid private archive encoding.");
+      }
+    }
     seen.add(folded);
     total += entry.bytes;
   }
@@ -179,9 +213,22 @@ export async function restoreArchive(store, digest, directory, expectedBinding) 
     }
   }
   if (total > archiveLimits.totalBytes) throw new Error("Private archive total byte limit exceeded.");
+  manifestByteLengths.set(manifest, bytes.length);
+  return manifest;
+}
+
+export async function restoreArchive(store, digest, directory, expectedBinding) {
+  const manifest = await readArchiveManifest(store, digest, expectedBinding);
   directory = await privateRefreshDirectory(directory, { create: true });
   for (const entry of manifest.entries) {
-    const payload = await store.get(`objects/${entry.sha256}`, entry.bytes);
+    const stored = await store.get(objectKey(entry), entry.storage?.bytes ?? entry.bytes);
+    if (!stored || stored.length !== (entry.storage?.bytes ?? entry.bytes)
+      || sha256(stored) !== (entry.storage?.sha256 ?? entry.sha256)) throw new Error("Private artifact integrity failed.");
+    let payload = stored;
+    if (entry.storage?.codec === "gzip") {
+      try { payload = gunzipSync(stored, { maxOutputLength: Math.max(1, entry.bytes) }); }
+      catch (error) { throw new Error("Private artifact decompression failed.", { cause: error }); }
+    }
     if (!payload || payload.length !== entry.bytes || sha256(payload) !== entry.sha256) throw new Error("Private artifact integrity failed.");
     const filename = path.join(directory, entry.path);
     await assertNoRefreshLinks(filename);

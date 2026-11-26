@@ -6,6 +6,7 @@ on:
       - .gitattributes
       - .github/workflows/ci.yml
       - .github/workflows/monthly-review.yml
+      - .github/workflows/private-capture.yml
       - MONTHLY_AUTOMATION.md
       - infra/**
       - reports/monthly/**
@@ -53,6 +54,7 @@ on:
       - .gitattributes
       - .github/workflows/ci.yml
       - .github/workflows/monthly-review.yml
+      - .github/workflows/private-capture.yml
       - MONTHLY_AUTOMATION.md
       - infra/**
       - reports/monthly/**
@@ -109,7 +111,7 @@ jobs:
         run: docker build --build-arg SOURCE_REVISION="$GITHUB_SHA" -f infra/azure-capture/Dockerfile -t nodoc-capture:test .
       - name: Exercise the image with synthetic data and no external network
         run: |
-          docker run --rm --network none --entrypoint node nodoc-capture:test --test /app/tools/tests/private-capture.test.mjs
+          docker run --rm --network none --entrypoint node nodoc-capture:test --test /app/tools/tests/private-capture.test.mjs /app/tools/tests/start-private-capture.test.mjs
           docker run --rm --network none --entrypoint chromium nodoc-capture:test --version
       - name: Start isolated synthetic Blob storage
         run: |

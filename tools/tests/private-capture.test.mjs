@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
+import { gzipSync } from "node:zlib";
 import { Readable } from "node:stream";
 import { execFileSync } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { PrivateBlobStore, archiveDirectory, jsonBytes, restoreArchive, sha256, validateStorageTarget } from "../private-capture-store.mjs";
+import { PrivateBlobStore, archiveAccounting, archiveDirectory, jsonBytes, restoreArchive, sha256, validateStorageTarget } from "../private-capture-store.mjs";
 import { captureArguments, executeCapture, restorePrivateCapture, runPrivateCapture, validateCapturePlan } from "../private-capture-job.mjs";
 import { prepareCoverageReview, assertCoverageReview } from "../publish-capture-coverage.mjs";
 import { publishReportFiles } from "../guarded-report-publication.mjs";
@@ -99,8 +101,79 @@ test("archive restores exact binary/empty files, refuses corruption and conflict
   await writeFile(path.join(restored, "private.bin"), "do not overwrite");
   await assert.rejects(restoreArchive(store, digest, restored, binding), /refused to overwrite/);
   await assert.rejects(restoreArchive(store, digest, path.join(root, "wrong-binding"), {}), /binding failed/);
-  container.data.set(`objects/${sha256(Buffer.from([0, 255, 128]))}`, Buffer.from([4, 5, 6]));
+  container.data.set(`objects/v2/identity/${sha256(Buffer.from([0, 255, 128]))}`, Buffer.from([4, 5, 6]));
   await assert.rejects(restoreArchive(store, digest, path.join(root, "corrupt"), binding), /integrity failed/);
+});
+
+test("versioned compression is lossless, smaller-only, deduplicated and accounts for retained bytes", async t => {
+  const root = await temporary(t), container = memoryContainer(), store = new PrivateBlobStore(container);
+  const source = path.join(root, "source");
+  await mkdir(source);
+  const text = Buffer.from("synthetic evidence\n".repeat(10000)), binary = randomBytes(4096);
+  for (const [name, bytes] of [["a.json", text], ["b.json", text], ["binary.bin", binary], ["empty", Buffer.alloc(0)]]) {
+    await writeFile(path.join(source, name), bytes);
+  }
+  const binding = { runId: "synthetic-compression" };
+  const legacyKey = `objects/${sha256(text)}`;
+  container.data.set(legacyKey, text);
+  const digest = await archiveDirectory(store, source, binding);
+  assert.equal(await archiveDirectory(store, source, binding), digest);
+  const manifest = await restoreArchive(store, digest, path.join(root, "restored"), binding);
+  assert.equal(manifest.schemaVersion, 2);
+  const entries = new Map(manifest.entries.map(entry => [entry.path, entry]));
+  assert.equal(entries.get("a.json").storage.codec, "gzip");
+  assert.equal(entries.get("binary.bin").storage.codec, "identity");
+  assert.equal(entries.get("empty").storage.codec, "identity");
+  assert.deepEqual(entries.get("a.json").storage, entries.get("b.json").storage);
+  assert.deepEqual(await readFile(path.join(root, "restored", "a.json")), text);
+  assert.deepEqual(await readFile(path.join(root, "restored", "binary.bin")), binary);
+  const summary = archiveAccounting(manifest);
+  assert.equal(summary.rawBytes, 2 * text.length + binary.length);
+  assert.equal(summary.storedBytes, 2 * entries.get("a.json").storage.bytes + binary.length);
+  assert.equal(summary.uniqueStoredBytes, entries.get("a.json").storage.bytes + binary.length);
+  assert.equal(summary.objectCount, 3);
+  assert.equal(summary.manifestBytes, container.data.get(`archives/${digest}.json`).length);
+  assert.ok(summary.storedBytes < summary.rawBytes / 10);
+  assert.deepEqual(container.data.get(legacyKey), text);
+});
+
+test("legacy manifests restore without conversion and report actual serialized bytes", async t => {
+  const root = await temporary(t), container = memoryContainer(), store = new PrivateBlobStore(container);
+  const payload = Buffer.from("legacy evidence"), binding = { runId: "legacy" };
+  const manifest = { schemaVersion: 1, binding, entries: [{ path: "legacy.json", bytes: payload.length, sha256: sha256(payload) }] };
+  const bytes = Buffer.from(JSON.stringify(manifest)), digest = sha256(bytes);
+  container.data.set(`archives/${digest}.json`, bytes);
+  container.data.set(`objects/${sha256(payload)}`, payload);
+  const restored = await restoreArchive(store, digest, path.join(root, "restored"), binding);
+  assert.deepEqual(await readFile(path.join(root, "restored", "legacy.json")), payload);
+  assert.equal(archiveAccounting(restored).manifestBytes, bytes.length);
+  assert.equal(archiveAccounting(restored).uniqueStoredBytes, payload.length);
+  assert.equal(container.data.size, 2);
+});
+
+test("compressed restore rejects unknown formats, bad hashes, truncation and decompression bombs", async t => {
+  const root = await temporary(t), container = memoryContainer(), store = new PrivateBlobStore(container);
+  const payload = Buffer.alloc(1024 * 1024, 65), encoded = gzipSync(payload);
+  const base = { path: "synthetic.json", bytes: payload.length, sha256: sha256(payload),
+    storage: { version: 1, codec: "gzip", bytes: encoded.length, sha256: sha256(encoded) } };
+  let index = 0;
+  async function rejects(entry, stored, pattern) {
+    const manifest = { schemaVersion: 2, binding: {}, entries: [entry] };
+    const bytes = jsonBytes(manifest), digest = sha256(bytes);
+    container.data.set(`archives/${digest}.json`, bytes);
+    container.data.set(`objects/v2/${entry.storage.codec}/${entry.storage.sha256}`, stored);
+    await assert.rejects(restoreArchive(store, digest, path.join(root, `bad-${index++}`), {}), pattern);
+  }
+  for (const patch of [{ version: 2 }, { codec: "brotli" }, { bytes: -1 }, { bytes: base.bytes + 1 }]) {
+    await rejects({ ...base, storage: { ...base.storage, ...patch } }, encoded, /encoding/);
+  }
+  await rejects(base, Buffer.alloc(encoded.length), /integrity/);
+  await rejects({ ...base, sha256: "0".repeat(64) }, encoded, /integrity/);
+  await rejects({ ...base, bytes: encoded.length + 1 }, encoded, /decompression/);
+  const truncated = encoded.subarray(0, encoded.length - 8);
+  await rejects({ ...base, storage: { ...base.storage, bytes: truncated.length, sha256: sha256(truncated) } }, truncated, /decompression/);
+  const broken = Buffer.from("not a gzip file");
+  await rejects({ ...base, storage: { ...base.storage, bytes: broken.length, sha256: sha256(broken) } }, broken, /decompression/);
 });
 
 test("two synthetic cycles retain outcomes; restored retries never recapture", async t => {
@@ -108,7 +181,8 @@ test("two synthetic cycles retain outcomes; restored retries never recapture", a
   let calls = 0;
   const execute = async (_plan, directory) => {
     calls++;
-    await writeFile(path.join(directory, "synthetic.json"), '{"synthetic":true,"observations":[]}');
+    await mkdir(path.join(directory, "capture"));
+    await writeFile(path.join(directory, "capture", "synthetic.json"), '{"synthetic":true,"observations":[]}');
     return { status: "blocked", reason: calls === 1 ? "authentication-required" : "rate-limited" };
   };
   for (const [index, reason] of ["authentication-required", "rate-limited"].entries()) {
@@ -117,10 +191,12 @@ test("two synthetic cycles retain outcomes; restored retries never recapture", a
     const first = await runPrivateCapture({ ...options, directory: path.join(root, `cycle-${index}`) });
     assert.equal(first.status, "blocked");
     assert.equal(first.reason, reason);
+    assert.ok(first.storage.rawBytes > 0);
     const retry = await runPrivateCapture({ ...options, directory: path.join(root, `restored-${index}`) });
     assert.equal(retry.reused, true);
     assert.equal(retry.archiveDigest, first.archiveDigest);
-    assert.deepEqual(await readFile(path.join(root, `restored-${index}`, "synthetic.json")), Buffer.from('{"synthetic":true,"observations":[]}'));
+    assert.deepEqual(retry.storage, first.storage);
+    assert.deepEqual(await readFile(path.join(root, `restored-${index}`, "capture", "synthetic.json")), Buffer.from('{"synthetic":true,"observations":[]}'));
   }
   assert.equal(calls, 2);
 });
@@ -130,7 +206,8 @@ test("interrupted upload cannot publish completion or replay a possibly executed
   let calls = 0;
   const execute = async (_plan, directory) => {
     calls++;
-    await writeFile(path.join(directory, "synthetic.json"), "{}");
+    await mkdir(path.join(directory, "capture"));
+    await writeFile(path.join(directory, "capture", "synthetic.json"), "{}");
     container.failUpload = key => key.startsWith("objects/");
     return { status: "capture-completed", reason: "independent-review-required" };
   };
@@ -147,6 +224,43 @@ test("interrupted upload cannot publish completion or replay a possibly executed
   assert.equal(calls, 1);
   await restorePrivateCapture({ plan: plan(), store, directory: path.join(root, "off-machine-restore") });
   assert.equal(calls, 1);
+});
+
+test("unexpected authentication workspace content prevents archival and completion", async t => {
+  const root = await temporary(t), container = memoryContainer(), store = new PrivateBlobStore(container);
+  const directory = path.join(root, "evidence");
+  await assert.rejects(runPrivateCapture({
+    plan: plan(), store, directory, verify: async () => {},
+    execute: async (_plan, evidence) => {
+      await mkdir(path.join(evidence, "browser-profile"));
+      await writeFile(path.join(evidence, "passkey.json"), '{"synthetic":"not-a-real-credential"}');
+      return { status: "blocked", reason: "authentication-required" };
+    },
+  }), /Unexpected evidence workspace/);
+  assert.equal(container.data.has(`runs/${plan().runId}/completed.json`), false);
+  assert.equal([...container.data.keys()].some(key => key.startsWith("objects/")), false);
+});
+
+test("driver home and temporary files are isolated outside evidence and removed", async t => {
+  const root = await temporary(t), directory = path.join(root, "evidence"), driver = path.join(root, "driver.mjs");
+  await mkdir(directory);
+  await writeFile(driver, `
+    import { writeFileSync } from "node:fs";
+    writeFileSync(process.env.HOME + "/synthetic-auth.tmp", "synthetic");
+    console.log(JSON.stringify({home: process.env.HOME, temp: process.env.TEMP,
+      tmp: process.env.TMP, tmpdir: process.env.TMPDIR, azure: process.env.AZURE_CLIENT_ID ?? null}));
+    process.exitCode = 1;
+  `);
+  const outcome = await executeCapture(plan(), directory, new AbortController().signal, { driver });
+  assert.equal(outcome.status, "blocked");
+  const runtime = JSON.parse((await readFile(path.join(directory, "driver-private.log"), "utf8")).trim());
+  assert.equal(path.dirname(runtime.home), root);
+  assert.notEqual(runtime.home, directory);
+  assert.equal(runtime.home, runtime.temp);
+  assert.equal(runtime.home, runtime.tmp);
+  assert.equal(runtime.home, runtime.tmpdir);
+  assert.equal(runtime.azure, null);
+  await assert.rejects(readFile(path.join(runtime.home, "synthetic-auth.tmp")), { code: "ENOENT" });
 });
 
 test("capture lease prevents overlap and failed renewal aborts the active worker", async t => {
