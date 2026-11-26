@@ -101,8 +101,14 @@ test("controller blocks when measured benchmark outputs are missing", async () =
   }
   const inputs = Object.fromEntries(benchmarkCorpus.scenarios.map((scenario) => [scenario.scenarioId, scenario.assertions]));
   const pass = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkMode: "measured", benchmarkInputs: inputs } });
-  assert.equal(pass.state, "offline-ready");
+  assert.equal(pass.state, "capture-recommended");
+  assert.equal(pass.reasonCode, "frontier-unresolved");
+  assert.equal(pass.mode, "report-only");
+  assert.equal(pass.execution.preflight.apply, false);
   assert.deepEqual(pass.benchmark.regressions, []);
+  assert.equal(pass.frontier.items.filter((item) => item.class === "benchmark-regression").length, 0);
+  assert.ok(pass.frontier.items.some((item) => item.class === "portfolio-gap"));
+  assert.ok(pass.frontier.items.some((item) => item.class === "unassessed-workflow"));
   const scenario = benchmarkCorpus.scenarios[0];
   inputs[scenario.scenarioId] = {};
   const fail = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkMode: "measured", benchmarkInputs: inputs } });
