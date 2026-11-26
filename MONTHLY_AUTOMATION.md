@@ -163,6 +163,10 @@ does not authenticate a portal user; do not weaken MFA or conditional access.
 The implemented private-capture runtime uploads and restores private evidence
 and receipts without logging them, and its separately approved publisher
 proposes sanitized coverage reports on a review branch, never directly on main.
+Each dated coverage snapshot includes only specifications bound to complete
+captures in that refresh. Its totals are scoped to those specifications;
+other specifications are shown as unassessed in that snapshot, not as zero.
+Earlier snapshots remain dated historical records and are not copied forward.
 The existing public monthly workflow does not perform those capture steps.
 Deployment and real signed-in acceptance remain outstanding.
 

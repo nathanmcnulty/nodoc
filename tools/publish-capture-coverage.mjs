@@ -13,10 +13,18 @@ export function prepareCoverageReview(inputBytes, sourceRevision, publicTitles) 
   if (!/^[a-f0-9]{40}$/u.test(sourceRevision)) throw new Error("Full source revision required.");
   const input = JSON.parse(inputBytes);
   if (input.mode !== "report-only" || !Array.isArray(input.blockers) || input.blockers.length
-    || !Array.isArray(input.captures) || !input.captures.length || input.captures.some(capture => capture.captureComplete !== true)) {
+    || !Array.isArray(input.captures) || !input.captures.length || input.captures.some(capture => !capture || capture.captureComplete !== true)) {
     throw new Error("Only a complete, unblocked private refresh report may be proposed for publication.");
   }
-  const snapshot = projectRefreshOutput(input, { baseRevision: sourceRevision, publicTitles });
+  if (!(publicTitles instanceof Map)) throw new Error("A public spec catalog is required.");
+  const assessedSpecIds = new Set();
+  for (const capture of input.captures) {
+    if (typeof capture.specId !== "string" || !publicTitles.has(capture.specId)) {
+      throw new Error("Capture must bind a known public specId.");
+    }
+    assessedSpecIds.add(capture.specId);
+  }
+  const snapshot = projectRefreshOutput(input, { baseRevision: sourceRevision, publicTitles, assessedSpecIds });
   snapshot.source.report = `reports/coverage/${snapshot.snapshotId}.md`;
   const review = { schemaVersion: 1, decision: "pending", sourceRevision,
     inputSha256: sha256(inputBytes), snapshotSha256: sha256(jsonBytes(snapshot)) };
@@ -45,7 +53,8 @@ export async function publishCaptureCoverage(inputBytes, review, options = {}) {
     `# Reviewed coverage assessment ${snapshot.snapshotId}`, "",
     `Assessment: ${snapshot.assessedAt}; window: ${snapshot.windowDays} days.`,
     `Source revision: \`${sourceRevision}\`.`, "",
-    "This is a reviewed aggregate projection. Observed, healthy and contract-complete are distinct measures.",
+    "This is a reviewed aggregate projection scoped to specifications with complete captures. Other specifications were not assessed in this snapshot.",
+    "Observed, healthy and contract-complete are distinct measures.",
     "Raw captures, private review receipts and tenant identifiers remain outside this repository.", "",
     "| Measure | Count |", "| --- | ---: |",
     ...Object.entries(snapshot.totals).map(([key, value]) => `| ${key} | ${value} |`), "",

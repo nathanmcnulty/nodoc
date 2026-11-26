@@ -22,9 +22,16 @@ export async function publishReportFiles({ branch, files, sourceRevision, messag
   if (!names.length || names.length > 3 || names.some(file => !/^(?:reports\/monthly\/\d{4}-\d{2}\.json|reports\/coverage\/\d{4}-\d{2}-\d{2}\.md|src\/data\/coverageSnapshots\/\d{4}-\d{2}-\d{2}\.json|src\/generated\/publicCoverage\.ts)$/u.test(file))) throw new Error("Unsupported publication path.");
   if (publicationGit(["ls-remote", "--heads", remote, `refs/heads/${branch}`], { env })) {
     publicationGit(["fetch", "--no-tags", remote, `refs/heads/${branch}`], { env });
+    const reject = () => { throw new Error("Review branch already exists with different content or source; it was not overwritten."); };
+    const parents = publicationGit(["rev-list", "--parents", "-n", "1", "FETCH_HEAD"]).split(" ");
+    if (parents.length !== 2 || parents[1] !== sourceRevision) reject();
+    const changed = publicationGit(["diff", "--no-renames", "--name-only", "-z", sourceRevision, "FETCH_HEAD"]).split("\0").filter(Boolean);
+    if (changed.some(file => !names.includes(file))) reject();
     for (const file of names) {
+      const entry = publicationGit(["ls-tree", "FETCH_HEAD", "--", file]);
+      if (!/^100644 blob [a-f0-9]{40}\t/u.test(entry)) reject();
       const previous = execFileSync("git", ["show", `FETCH_HEAD:${file}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-      if (previous !== files[file]) throw new Error("Review branch already exists with different content; it was not overwritten.");
+      if (previous !== files[file]) reject();
     }
     return { branch, status: "unchanged" };
   }

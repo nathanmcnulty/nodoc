@@ -10,6 +10,8 @@ export const jsonBytes = value => Buffer.from(`${JSON.stringify(value, null, 2)}
 export const digestPattern = /^[a-f0-9]{64}$/u;
 export const archiveLimits = { files: 2000, fileBytes: 64 * 1024 * 1024, totalBytes: 256 * 1024 * 1024 };
 
+class PrivateBlobTooLarge extends Error {}
+
 async function readPrivateFile(filename) {
   const chunks = [];
   let length = 0;
@@ -47,16 +49,17 @@ export class PrivateBlobStore {
     try {
       const signal = AbortSignal.timeout(30000);
       const response = await this.container.getBlobClient(validKey(key)).download(0, undefined, { abortSignal: signal });
-      if (response.contentLength > maximum || !response.readableStreamBody) {
+      if (response.contentLength > maximum) {
         response.readableStreamBody?.destroy();
-        throw new Error("Invalid private blob length or stream.");
+        throw new PrivateBlobTooLarge("Private blob exceeds its bound.");
       }
+      if (!response.readableStreamBody) throw new Error("Invalid private blob stream.");
       addAbortSignal(signal, response.readableStreamBody);
       const chunks = [];
       let bytes = 0;
       for await (const chunk of response.readableStreamBody) {
         bytes += chunk.length;
-        if (bytes > maximum) { response.readableStreamBody.destroy(); throw new Error("Private blob exceeds its bound."); }
+        if (bytes > maximum) { response.readableStreamBody.destroy(); throw new PrivateBlobTooLarge("Private blob exceeds its bound."); }
         chunks.push(chunk);
       }
       return Buffer.concat(chunks);
@@ -76,7 +79,12 @@ export class PrivateBlobStore {
     } catch (error) {
       if (![409, 412].includes(error.statusCode)) throw new Error("Private blob upload failed.", { cause: error });
     }
-    const restored = await this.get(key, bytes.length);
+    let restored;
+    try { restored = await this.get(key, bytes.length); }
+    catch (error) {
+      if (error.cause instanceof PrivateBlobTooLarge) throw new Error("Private blob readback mismatch; existing data was not overwritten.");
+      throw error;
+    }
     if (!restored?.equals(bytes)) throw new Error("Private blob readback mismatch; existing data was not overwritten.");
   }
 

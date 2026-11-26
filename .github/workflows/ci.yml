@@ -166,6 +166,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test scoped capture coverage and publication
+        run: node --test tools/tests/private-coverage-scope.test.mjs tools/tests/public-coverage.test.mjs tools/tests/monthly-review.test.mjs
+
       - name: Test offline evidence review and Postman conversion
         run: npm run test:evidence
         env:

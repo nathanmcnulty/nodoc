@@ -8,11 +8,11 @@ import { repoRoot } from "./spec-quality-lib.mjs";
 
 const outputPath = path.join(repoRoot, "src", "generated", "publicCoverage.ts");
 
-export async function renderPublicCoverage(snapshots) {
+export async function renderPublicCoverage(snapshots, { inventory = null } = {}) {
   const latest = snapshots.at(-1);
   // Authored gaps come from today's source; observations come only from the
   // reviewed snapshot. Rebuilding the site never renews an observation date.
-  const inventory = await buildRefreshInventory({ asOf: latest.snapshotId, freshnessDays: latest.windowDays });
+  inventory ??= await buildRefreshInventory({ asOf: latest.snapshotId, freshnessDays: latest.windowDays });
   assertPublicCoverageSnapshot(latest, { knownSpecIds: new Set(inventory.specs.map(spec => spec.specId)) });
   const latestBySpec = new Map(latest.specs.map(({ specId, title, ...row }) => [specId, row]));
   const data = {

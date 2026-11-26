@@ -47,7 +47,7 @@ export function captureArguments(plan, directory) {
 }
 
 // The cloud supervisor owns the entire subprocess tree. Child diagnostics never enter job logs.
-export async function executeCapture(plan, directory, signal, { driver = path.join(repoRoot, "tools", "run-portal-discovery.mjs") } = {}) {
+export async function executeCapture(plan, directory, signal, { driver = path.join(repoRoot, "tools", "run-portal-discovery.mjs"), refreshPortfolio = null } = {}) {
   const log = [];
   let size = 0, stopReason = null, escalation;
   const child = spawn(process.execPath, [driver, ...captureArguments(plan, directory)], {
@@ -88,13 +88,15 @@ export async function executeCapture(plan, directory, signal, { driver = path.jo
     if (stopReason) return { status: "blocked", reason: stopReason };
     const run = JSON.parse(await readFile(path.join(directory, "capture", "discovery-run.json"), "utf8"));
     if (code !== 0 || run.status !== "completed") return { status: "blocked", reason: "capture-driver-blocked" };
-    const { runPortfolioRefresh } = await import("./portal-refresh.mjs");
+    const runPortfolioRefresh = refreshPortfolio ?? (await import("./portal-refresh.mjs")).runPortfolioRefresh;
     const refresh = await runPortfolioRefresh({
       captures: [{ specId: plan.specId, artifacts: path.join(directory, "capture") }],
       cacheDir: path.join(directory, "refresh-cache"), outputDir: path.join(directory, "refresh"),
       asOf: new Date().toISOString(), freshnessDays: 30,
     });
-    return refresh.execution.blockedCaptureCount
+    return refresh.execution.blockedCaptureCount || !Array.isArray(refresh.report?.captures)
+      || refresh.report.captures.length !== 1 || refresh.report.captures[0]?.specId !== plan.specId
+      || refresh.report.captures[0]?.captureComplete !== true
       ? { status: "blocked", reason: "capture-analysis-blocked" }
       : { status: "capture-completed", reason: "independent-review-required" };
   } catch (error) {

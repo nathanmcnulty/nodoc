@@ -75,6 +75,9 @@ test("private immutable uploads verify readback, empty files and conflicting con
   await store.put("objects/empty", Buffer.alloc(0));
   await assert.rejects(store.put("objects/empty", Buffer.from("different")), /readback mismatch/);
   assert.equal(container.data.get("objects/empty").length, 0);
+  await store.put("objects/larger", Buffer.from("larger"));
+  await assert.rejects(store.put("objects/larger", Buffer.from("x")), /readback mismatch/);
+  assert.equal(container.data.get("objects/larger").toString(), "larger");
   container.failUpload = () => true;
   await assert.rejects(store.put("objects/new", Buffer.from("private-marker")), error => error.message === "Private blob upload failed.");
   const missing = await store.get("objects/missing");
@@ -197,7 +200,7 @@ test("supervisor stops stalled or noisy synthetic subprocesses and retains bound
 test("reviewed coverage publication binds source, input, projection and original assessment", () => {
   const measures = { currentObservations: 1, staleObservations: 0, notObserved: 0, errorObserved: 0, completeBodyObserved: 1, schemaGaps: 1, exampleGaps: 1 };
   const input = { schemaVersion: 1, mode: "report-only", asOf: "2026-11-06T12:00:00Z", freshnessDays: 30,
-    blockers: [], captures: [{ captureComplete: true }],
+    blockers: [], captures: [{ specId: "nodoc-example", captureComplete: true }],
     portfolio: { summary: { specCount: 1, operationCount: 1, ...measures },
       specs: [{ specId: "nodoc-example", title: "PRIVATE-MARKER", operationCount: 1, freshness: measures }] } };
   const prepared = prepareCoverageReview(jsonBytes(input), "a".repeat(40), new Map([["nodoc-example", "Public example"]]));
@@ -240,6 +243,31 @@ test("three-file coverage publication uses a real create-only Git remote", async
     git(["checkout", "--detach", revision], checkout);
     assert.equal((await publishReportFiles(request)).status, "unchanged");
     await assert.rejects(publishReportFiles({ ...request, files: { ...files, "reports/coverage/2026-11-06.md": "changed\n" } }), /different content/);
+    const ref = `refs/heads/${request.branch}`;
+    const candidate = git(["--git-dir", remote, "rev-parse", ref]);
+    const tree = git(["rev-parse", `${candidate}^{tree}`], checkout);
+    const setRemote = commit => git(["push", "--force", "origin", `${commit}:${ref}`], checkout);
+    const rejectCandidate = async commit => {
+      setRemote(commit);
+      await assert.rejects(publishReportFiles(request), /already exists/);
+      assert.equal(git(["--git-dir", remote, "rev-parse", ref]), commit);
+    };
+    const otherBase = git(["commit-tree", `${revision}^{tree}`, "-p", revision, "-m", "other base"], checkout);
+    await rejectCandidate(git(["commit-tree", tree, "-p", otherBase, "-m", "wrong source"], checkout));
+    await rejectCandidate(git(["commit-tree", tree, "-p", candidate, "-m", "extra commit"], checkout));
+    git(["read-tree", tree], checkout);
+    const blob = git(["rev-parse", `${candidate}:reports/coverage/2026-11-06.md`], checkout);
+    git(["update-index", "--add", "--cacheinfo", `100644,${blob},unrelated.txt`], checkout);
+    const unrelated = git(["commit-tree", git(["write-tree"], checkout), "-p", revision, "-m", "unrelated file"], checkout);
+    git(["read-tree", revision], checkout);
+    await rejectCandidate(unrelated);
+    git(["read-tree", tree], checkout);
+    git(["update-index", "--cacheinfo", `100755,${blob},reports/coverage/2026-11-06.md`], checkout);
+    const wrongMode = git(["commit-tree", git(["write-tree"], checkout), "-p", revision, "-m", "wrong mode"], checkout);
+    git(["read-tree", revision], checkout);
+    await rejectCandidate(wrongMode);
+    setRemote(candidate);
+    assert.equal((await publishReportFiles(request)).status, "unchanged");
     assert.equal(git(["ls-remote", "origin", "refs/heads/main"], checkout), "");
   } finally { process.chdir(original); }
 });
