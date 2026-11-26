@@ -405,7 +405,7 @@
     {
       "recipePath": "tools/capture-recipes/m365-admin-known-refresh-20261029.json",
       "specId": "m365-admin",
-      "recipeSha256": "71732d48dab3cc0dd636ed43a49da0b1138456935d0d02cdec6200b9413b1e83",
+      "recipeSha256": "bd9e4a9b93585aa45d5c2dcaea9696a62c5e63ef37b8e4f406d9acd4095897ec",
       "disposition": "evaluated-with-gaps",
       "independentReview": {
         "artifactId": "frontiers-final-reporting-review-20261030",
@@ -418,7 +418,8 @@
       "nextRequirement": "Establish the exact owning UI, selected target and missing body/state objective before another reviewed passive capture; preserve this recipe's error, missing-signal and incomplete outcomes.",
       "limitations": [
         "Reviewed disposition only. Whole-spec freshness, business health, complete schemas, minimum roles and standalone execution remain unproved.",
-        "Historical terminal hashes bind the original executed recipe bytes. Publication-only provenance and dependent approval hashes may differ; the known-refresh execution core was independently checked unchanged."
+        "Historical terminal hashes bind the original executed recipe bytes. Publication-only provenance and dependent approval hashes may differ; the known-refresh execution core was independently checked unchanged.",
+        "The 2026-11-26 owner-authorized live refresh observed the target with a complete 200 response under executionDigest 6f49ac33b0d27e8fb0e111df0caa0cb90db4610b0270ba8bf823f777039f338b; its executed bytes differ from these only in approval provenance. That terminal has not been independently re-reviewed, and its queued undocumented candidates remain unpromoted."
       ],
       "terminals": [
         {
@@ -429,6 +430,15 @@
           "artifact": {
             "artifactId": "m365-admin-refresh-20261029-01-terminal",
             "sha256": "174af99344e8969ba11d8845d784ebbff847ccb07ec8c372fb5f267f0dd68c3f"
+          }
+        },
+        {
+          "assignmentId": "m365-admin-refresh-20261126-t3",
+          "captureComplete": true,
+          "status": "completed",
+          "artifact": {
+            "artifactId": "m365-admin-refresh-20261126-t3-assessment",
+            "sha256": "9db150e51bf3ac99597c87af93d4f1bd0d3f26b63e69802cc0651a45c01b0102"
           }
         }
       ]
