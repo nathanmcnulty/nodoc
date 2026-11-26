@@ -9,6 +9,41 @@
     "reviewBudget": { "timeoutMs": 120000, "retryCount": 1, "maxPayloadBytes": 262144 },
     "priority": 20
   },
+  "surfaceDefaults": {
+    "limits": {
+      "role": { "status": "unknown" },
+      "license": { "status": "unknown" },
+      "feature": { "status": "unknown" }
+    }
+  },
+  "surfaces": [
+    { "id": "defender", "name": "Microsoft Defender", "productArea": "Security", "portalUrls": ["https://security.microsoft.com"], "specIds": ["defender-xdr"], "status": "partial", "workflows": ["Cloud Apps", "Incidents"] },
+    { "id": "defender-mto", "name": "Microsoft Defender multi-tenant", "productArea": "Security", "portalUrls": ["https://mto.security.microsoft.com"], "specIds": ["defender-mto"], "status": "partial", "workflows": ["Organization switching"] },
+    { "id": "entra", "name": "Microsoft Entra admin center", "productArea": "Identity", "portalUrls": ["https://entra.microsoft.com"], "specIds": ["entra-b2c", "ibiza-iam", "entra-idgov", "entra-iga", "entra-pim"], "status": "partial", "workflows": ["Access reviews", "Privileged identity management"] },
+    { "id": "exchange", "name": "Exchange admin center", "productArea": "Exchange", "portalUrls": ["https://admin.exchange.microsoft.com"], "specIds": ["exchange-beta"], "status": "partial", "workflows": ["Mail flow", "Recipients"] },
+    { "id": "intune", "name": "Microsoft Intune admin center", "productArea": "Endpoint management", "portalUrls": ["https://intune.microsoft.com"], "specIds": ["intune-autopatch", "intune-portal"], "status": "partial", "workflows": ["Devices", "Windows Autopatch"] },
+    { "id": "m365-admin", "name": "Microsoft 365 admin center", "productArea": "Microsoft 365", "portalUrls": ["https://admin.cloud.microsoft"], "specIds": ["m365-admin"], "status": "partial", "workflows": ["Users", "Copilot settings"] },
+    { "id": "m365-apps", "name": "Microsoft 365 Apps admin center", "productArea": "Microsoft 365 Apps", "portalUrls": ["https://config.office.com"], "specIds": ["m365-apps-config", "m365-apps-inventory", "m365-apps-services"], "status": "partial", "workflows": ["Configuration", "Inventory"] },
+    { "id": "power-platform", "name": "Power Platform admin center", "productArea": "Power Platform", "portalUrls": ["https://admin.powerplatform.microsoft.com"], "specIds": ["power-platform"], "status": "partial", "workflows": ["Environments"] },
+    { "id": "purview", "name": "Microsoft Purview portal", "productArea": "Compliance", "portalUrls": ["https://purview.microsoft.com"], "specIds": ["purview", "purview-portal"], "status": "partial", "workflows": ["Data loss prevention", "Sensitivity labels"] },
+    { "id": "security-copilot", "name": "Microsoft Security Copilot", "productArea": "Security", "portalUrls": ["https://securitycopilot.microsoft.com"], "specIds": ["security-copilot"], "status": "partial", "workflows": ["Security analysis"] },
+    { "id": "sharepoint", "name": "SharePoint admin center", "productArea": "SharePoint", "portalUrls": ["https://{tenant}-admin.sharepoint.com"], "specIds": ["sharepoint-admin"], "status": "partial", "workflows": ["Sites"] },
+    { "id": "teams", "name": "Teams admin center", "productArea": "Teams", "portalUrls": ["https://admin.teams.microsoft.com"], "specIds": ["teams"], "status": "partial", "workflows": ["Users", "Policies"] },
+    { "id": "viva-engage", "name": "Viva Engage admin", "productArea": "Viva", "portalUrls": ["https://engage.cloud.microsoft/main/admin"], "specIds": ["viva-engage"], "status": "partial", "workflows": ["Network configuration"] },
+    { "id": "graph-research", "name": "Microsoft Graph research owner", "productArea": "Cross-portal Graph research", "portalUrls": ["https://graph.microsoft.com"], "specIds": ["graph-research"], "status": "partial", "workflows": ["Cross-portal Graph operations"] },
+    { "id": "azure", "name": "Azure portal blades", "productArea": "Azure", "portalUrls": ["https://portal.azure.com"], "specIds": [], "status": "unassessed", "workflows": ["Resource management blades"] },
+    { "id": "defender-cloud-apps", "name": "Defender for Cloud Apps", "productArea": "Security", "portalUrls": ["https://security.microsoft.com"], "specIds": ["defender-xdr"], "status": "partial", "workflows": ["Cloud Apps administration"] },
+    { "id": "fabric", "name": "Microsoft Fabric and Power BI admin", "productArea": "Fabric and Power BI", "portalUrls": ["https://app.powerbi.com"], "specIds": [], "status": "unassessed", "workflows": ["Admin portal", "Capacity settings"] },
+    { "id": "copilot-studio", "name": "Microsoft Copilot Studio", "productArea": "Copilot Studio", "portalUrls": ["https://copilotstudio.microsoft.com"], "specIds": [], "status": "unassessed", "workflows": ["Agents", "Environments"] },
+    { "id": "copilot-admin", "name": "Microsoft 365 Copilot admin", "productArea": "Microsoft 365 Copilot", "portalUrls": ["https://admin.cloud.microsoft"], "specIds": ["m365-admin"], "status": "partial", "workflows": ["Copilot administration"] },
+    { "id": "windows-365", "name": "Windows 365 administration", "productArea": "Cloud PC", "portalUrls": ["https://intune.microsoft.com"], "specIds": [], "status": "unassessed", "workflows": ["Cloud PCs", "Provisioning policies"] },
+    { "id": "azure-virtual-desktop", "name": "Azure Virtual Desktop", "productArea": "Azure Virtual Desktop", "portalUrls": ["https://portal.azure.com"], "specIds": [], "status": "unassessed", "workflows": ["Host pools", "Application groups"] },
+    { "id": "lighthouse", "name": "Microsoft 365 Lighthouse", "productArea": "Managed services", "portalUrls": ["https://lighthouse.microsoft.com"], "specIds": [], "status": "unassessed", "workflows": ["Customer management"] },
+    { "id": "dynamics", "name": "Dynamics 365 administration", "productArea": "Dynamics 365", "portalUrls": ["https://admin.powerplatform.microsoft.com"], "specIds": [], "status": "unassessed", "workflows": ["Dynamics environments"] },
+    { "id": "power-apps", "name": "Power Apps maker portal", "productArea": "Power Platform", "portalUrls": ["https://make.powerapps.com"], "specIds": [], "status": "unassessed", "workflows": ["Apps", "Solutions"] },
+    { "id": "power-automate", "name": "Power Automate portal", "productArea": "Power Platform", "portalUrls": ["https://make.powerautomate.com"], "specIds": [], "status": "unassessed", "workflows": ["Flows"] },
+    { "id": "viva-admin", "name": "Microsoft Viva administration", "productArea": "Viva", "portalUrls": ["https://admin.cloud.microsoft"], "specIds": [], "status": "unassessed", "workflows": ["Viva product administration"] }
+  ],
   "portals": [
     { "specId": "defender-xdr", "priority": 30, "riskTier": "high", "outstandingGapClasses": ["fresh-capture"] },
     { "specId": "defender-mto", "priority": 30, "riskTier": "high", "outstandingGapClasses": ["scope-review"] },

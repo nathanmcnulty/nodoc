@@ -89,6 +89,8 @@ Run `npm run test:evidence` for the scoped offline contract, provenance, report-
 
 The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files, and the repo also keeps a machine-readable portal coverage ledger under `src/generated/`.
 
+- The spec-based discovery queue and the separate in-scope surface inventory share `tools/portal-discovery-portfolio.json`. Run `npm run show:portal-surfaces` for a deterministic map with spec server URLs, registered recipe paths and the approval artifacts those recipes reference. Those references are not a claim that approval is current or executable.
+- Every surface has a mapping or an explicit gap status. Workflow names are unassessed leads, not observed UI states; role, license and feature limits default to unknown and require a value and evidence reference to be marked observed. The integrated frontier reports gaps and unassessed workflows for manual review, never as capture authorization.
 - Regenerate it with `npm run generate:site-data`.
 - `npm run build`, `npm run start`, and `npm run typecheck` already regenerate this data automatically.
 - The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.

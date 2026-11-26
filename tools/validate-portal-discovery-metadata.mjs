@@ -17,6 +17,7 @@ import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
 import { buildKnownOperationRefreshPlan, classifyKnownOperationExecutionApproval, isValidKnownOperationRefreshExpiryTimestamp } from "./portal-discovery-evidence-contract.mjs";
 import { validateActiveOperationPlan } from "./portal-discovery-operation-safety.mjs";
 import { validateReviewAttribution } from "./portal-discovery-model-policy.mjs";
+import { validateSurfaces } from "./portal-discovery-surfaces.mjs";
 
 const legacyExecutionApprovals = new Set();
 const boundExecutionApprovals = new Set();
@@ -102,6 +103,11 @@ async function validatePortfolioCoverageGapClasses(errors, specInventory) {
   }
 
   const portfolioBySpecId = new Map((portfolio.portals ?? []).map((entry) => [entry.specId, entry]));
+  try {
+    validateSurfaces(portfolio, specInventory);
+  } catch (error) {
+    fail(errors, `Portfolio surfaces: ${error.message}`);
+  }
   for (const spec of specInventory) {
     const overlay = getCoverageOverlay(spec.title);
     if (!Array.isArray(overlay.openGapClasses) || overlay.openGapClasses.length === 0) {
